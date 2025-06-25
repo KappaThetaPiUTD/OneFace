@@ -1,0 +1,560 @@
+/* Dark Mode Variables */
+body {
+  --settings-bg: #fff;
+  --settings-text: #333;
+  --settings-text-secondary: #555;
+  --settings-text-muted: #777;
+  --settings-border: #e0e0e0;
+  --settings-border-light: #f0f0f0;
+  --settings-sidebar-bg: #fff;
+  --settings-active-tab-bg: #f0f6f9;
+  --settings-active-tab-color: var(--wave);
+  --settings-hover-bg: #f9f9f9;
+  --settings-input-border: #ccc;
+  --settings-input-bg: #fff;
+  --settings-toggle-bg: #ccc;
+  --settings-theme-btn-bg: #f0f0f0;
+  --settings-theme-btn-border: #ddd;
+  --settings-btn-bg: #f0f0f0;
+  --settings-btn-color: #333;
+  --settings-card-bg: #fff;
+  --settings-secondary-btn-bg: #f0f0f0;
+  --settings-secondary-btn-color: #333;
+  --settings-secondary-btn-border: #ddd;
+  --settings-danger-btn-bg: #fff0f0;
+  --settings-danger-btn-color: #d32f2f;
+  --settings-danger-btn-border: #ffcdd2;
+  --settings-action-row-border: #f0f0f0;
+}
+
+/* Dark mode specific variables */
+body[data-theme="dark"] {
+  --settings-bg: #1a1a1a;
+  --settings-text: #e0e0e0;
+  --settings-text-secondary: #b0b0b0;
+  --settings-text-muted: #888;
+  --settings-border: #333;
+  --settings-border-light: #2a2a2a;
+  --settings-sidebar-bg: #222;
+  --settings-active-tab-bg: #2a3b47;
+  --settings-active-tab-color: #80c6e8;
+  --settings-hover-bg: #2a2a2a;
+  --settings-input-border: #444;
+  --settings-input-bg: #333;
+  --settings-toggle-bg: #444;
+  --settings-theme-btn-bg: #333;
+  --settings-theme-btn-border: #444;
+  --settings-btn-bg: #333;
+  --settings-btn-color: #e0e0e0;
+  --settings-card-bg: #252525;
+  --settings-secondary-btn-bg: #333;
+  --settings-secondary-btn-color: #e0e0e0;
+  --settings-secondary-btn-border: #444;
+  --settings-danger-btn-bg: #3a1c1c;
+  --settings-danger-btn-color: #ff5252;
+  --settings-danger-btn-border: #4c2b2b;
+  --settings-action-row-border: #2a2a2a;
+}
+
+/* The system theme section is now handled by JavaScript */
+/* We'll leave this here for progressive enhancement, but the JavaScript logic will apply the actual theme */
+@media (prefers-color-scheme: dark) {
+  body[data-using-system-theme="true"] {
+    --settings-bg: #1a1a1a;
+    --settings-text: #e0e0e0;
+    --settings-text-secondary: #b0b0b0;
+    --settings-text-muted: #888;
+    --settings-border: #333;
+    --settings-border-light: #2a2a2a;
+    --settings-sidebar-bg: #222;
+    --settings-active-tab-bg: #2a3b47;
+    --settings-active-tab-color: #80c6e8;
+    --settings-hover-bg: #2a2a2a;
+    --settings-input-border: #444;
+    --settings-input-bg: #333;
+    --settings-toggle-bg: #444;
+    --settings-theme-btn-bg: #333;
+    --settings-theme-btn-border: #444;
+    --settings-btn-bg: #333;
+    --settings-btn-color: #e0e0e0;
+    --settings-card-bg: #252525;
+    --settings-secondary-btn-bg: #333;
+    --settings-secondary-btn-color: #e0e0e0;
+    --settings-secondary-btn-border: #444;
+    --settings-danger-btn-bg: #3a1c1c;
+    --settings-danger-btn-color: #ff5252;
+    --settings-danger-btn-border: #4c2b2b;
+    --settings-action-row-border: #2a2a2a;
+  }
+}
+
+/* Color-blind Mode */
+body.color-blind-mode {
+  --settings-active-tab-color: #084c61;
+  --wave: #084c61;
+}
+
+body.color-blind-mode[data-theme="dark"] {
+  --settings-active-tab-color: #55c2da;
+  --wave: #55c2da;
+}
+
+/* Color-blind Mode with System theme */
+@media (prefers-color-scheme: dark) {
+  body.color-blind-mode[data-using-system-theme="true"] {
+    --settings-active-tab-color: #55c2da;
+    --wave: #55c2da;
+  }
+}
+
+/* Settings Page Styles */
+.settings-container {
+  background: var(--settings-card-bg);
+  border-radius: var(--card-radius);
+  box-shadow: var(--shadow);
+  padding: 0;
+  margin-bottom: 40px;
+  color: var(--settings-text);
+}
+
+.settings-title {
+  padding: 24px;
+  margin: 0;
+  border-bottom: 1px solid var(--settings-border);
+  font-size: 24px;
+}
+
+.settings-layout {
+  display: flex;
+}
+
+/* Sidebar */
+.settings-sidebar {
+  width: 220px;
+  border-right: 1px solid var(--settings-border);
+  flex-shrink: 0;
+  background: var(--settings-sidebar-bg);
+}
+
+.settings-tab {
+  padding: 16px 24px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-bottom: 1px solid var(--settings-border-light);
+  color: var(--settings-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settings-tab:hover {
+  background: var(--settings-hover-bg);
+  color: var(--settings-text);
+}
+
+.settings-tab.active {
+  background: var(--settings-active-tab-bg);
+  color: var(--settings-active-tab-color);
+  font-weight: 500;
+  border-left: 3px solid var(--settings-active-tab-color);
+}
+
+.tab-icon {
+  display: flex;
+  align-items: center;
+}
+
+.tab-text {
+  flex: 1;
+}
+
+/* Content Area */
+.settings-content {
+  flex: 1;
+  padding: 24px 32px;
+  min-height: 600px;
+  background: var(--settings-card-bg);
+}
+
+.content-title {
+  margin: 0 0 24px 0;
+  font-size: 20px;
+  color: var(--settings-text);
+}
+
+/* Profile Grid */
+.settings-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 40px;
+}
+
+.avatar-container {
+  text-align: center;
+}
+
+.avatar {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin: 0 auto;
+  border: 3px solid var(--settings-border);
+}
+
+.avatar-btn {
+  margin-top: 16px;
+  background: var(--settings-btn-bg);
+  color: var(--settings-btn-color);
+  border: 1px solid var(--settings-border);
+  border-radius: 4px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.avatar-btn:hover {
+  filter: brightness(0.95);
+}
+
+/* Settings Sections */
+.settings-section {
+  margin-bottom: 32px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--settings-border-light);
+}
+
+.section-title {
+  font-size: 18px;
+  margin: 0 0 16px 0;
+  color: var(--settings-text);
+}
+
+.setting-row {
+  display: flex;
+  margin-bottom: 16px;
+  align-items: center;
+}
+
+.setting-label {
+  width: 130px;
+  flex-shrink: 0;
+  font-weight: 500;
+  color: var(--settings-text-secondary);
+}
+
+.setting-value {
+  flex: 1;
+  color: var(--settings-text);
+}
+
+.setting-value input,
+.setting-value select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--settings-input-border);
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: var(--settings-input-bg);
+  color: var(--settings-text);
+}
+
+/* Narrower select for language dropdown */
+.language-select {
+  width: auto !important;
+  min-width: 150px !important;
+}
+
+.editable .setting-value {
+  flex: 2;
+}
+
+/* New edit/save buttons */
+.edit-btn {
+  background: none;
+  border: none;
+  color: var(--wave);
+  cursor: pointer;
+  padding: 4px 8px;
+  margin-left: 8px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.edit-btn:hover {
+  background: rgba(0, 100, 138, 0.1);
+}
+
+.edit-btn-large {
+  background: none;
+  border: 1px solid var(--wave);
+  color: var(--wave);
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-top: 16px;
+  transition: all 0.2s;
+}
+
+.edit-btn-large:hover {
+  background: rgba(0, 100, 138, 0.1);
+}
+
+.save-btn {
+  background: var(--wave);
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-top: 16px;
+  transition: all 0.2s;
+}
+
+.save-btn:hover {
+  filter: brightness(1.1);
+}
+
+/* Theme toggles */
+.theme-toggles {
+  display: flex;
+  gap: 8px;
+}
+
+.theme-btn {
+  background: var(--settings-theme-btn-bg);
+  border: 1px solid var(--settings-theme-btn-border);
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--settings-text);
+}
+
+.theme-btn.active {
+  background: var(--wave);
+  color: white;
+  border-color: var(--wave);
+}
+
+/* Toggle Switch */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 52px;
+  height: 26px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--settings-toggle-bg);
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+  background-color: var(--wave);
+}
+
+input:checked + .toggle-slider:before {
+  transform: translateX(26px);
+}
+
+/* Action Rows */
+.action-row {
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--settings-action-row-border);
+  margin-bottom: 0;
+}
+
+.action-row:last-child {
+  border-bottom: none;
+}
+
+.setting-description {
+  font-size: 13px;
+  color: var(--settings-text-muted);
+  margin-top: 4px;
+}
+
+.secondary-btn {
+  padding: 6px 16px;
+  background: var(--settings-secondary-btn-bg);
+  color: var(--settings-secondary-btn-color);
+  border: 1px solid var(--settings-secondary-btn-border);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.secondary-btn:hover {
+  filter: brightness(0.95);
+}
+
+.danger-btn {
+  padding: 6px 16px;
+  background: var(--settings-danger-btn-bg);
+  color: var(--settings-danger-btn-color);
+  border: 1px solid var(--settings-danger-btn-border);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.danger-btn:hover {
+  filter: brightness(1.1);
+}
+
+.danger {
+  color: var(--settings-danger-btn-color);
+}
+
+/* Notification Options */
+.notification-options {
+  display: flex;
+  gap: 16px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  color: var(--settings-text);
+}
+
+/* Faceprint Status Demo Controls */
+.faceprint-status-row {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.faceprint-status-row h4.sub-section-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--settings-text);
+}
+
+.faceprint-demo-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.demo-btn {
+  background-color: var(--settings-btn-bg);
+  color: var(--settings-btn-color);
+  border: 1px solid var(--settings-border);
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.demo-btn:hover {
+  background-color: var(--settings-hover-bg);
+}
+
+.demo-btn.active {
+  background-color: var(--settings-active-tab-bg);
+  border-color: var(--wave);
+  color: var(--settings-active-tab-color);
+}
+
+body[data-theme="dark"] .demo-btn.active,
+body[data-using-system-theme="true"] .demo-btn.active {
+  background-color: #2a3b47;
+}
+
+@media (max-width: 600px) {
+  .faceprint-demo-controls {
+    flex-wrap: wrap;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .settings-layout {
+    flex-direction: column;
+  }
+  
+  .settings-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--settings-border);
+    display: flex;
+    overflow-x: auto;
+  }
+  
+  .settings-tab {
+    padding: 12px 16px;
+    white-space: nowrap;
+  }
+  
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .avatar-container {
+    margin-bottom: 32px;
+  }
+}
+
+@media (max-width: 600px) {
+  .setting-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .setting-label {
+    margin-bottom: 6px;
+  }
+  
+  .notification-options {
+    margin-top: 8px;
+  }
+  
+  .action-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+/* Placeholder styles */
+.placeholder-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: var(--settings-text-muted);
+}

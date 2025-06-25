@@ -1,0 +1,57 @@
+:root {
+  --sidebar: #6ba5b7;
+  --wave: #00648a;
+  --wave-rgb: 0, 100, 138; /* RGB values for animations */
+  --bg: #d9d9d9;
+  --font-body: "Inter", system-ui, sans-serif;
+  --card-border: 1px solid #d0d0d0;
+  --card-radius: 6px;
+  --shadow: 0 1px 3px rgb(0 0 0 / 0.08);
+  --animation-speed: 0.3s; /* Standard animation speed */
+  --animation-easing: ease; /* Standard easing function */
+}
+
+/* Dark mode variables */
+body[data-theme="dark"] {
+  --sidebar: #2c4759;
+  --wave: #1e88e5;
+  --wave-rgb: 30, 136, 229; /* RGB values for dark mode */
+  --bg: #121212;
+  --card-border: 1px solid #333;
+  --shadow: 0 1px 3px rgb(0 0 0 / 0.2);
+}
+
+/* System theme detection */
+@media (prefers-color-scheme: dark) {
+  body[data-using-system-theme="true"] {
+    --sidebar: #2c4759;
+    --wave: #1e88e5;
+    --wave-rgb: 30, 136, 229; /* RGB values for system dark mode */
+    --bg: #121212;
+    --card-border: 1px solid #333;
+    --shadow: 0 1px 3px rgb(0 0 0 / 0.2);
+  }
+}
+
+/* Color-blind Mode */
+body.color-blind-mode {
+  --wave: #084c61;
+  --wave-rgb: 8, 76, 97; /* RGB values for color-blind mode */
+  --sidebar: #45818e;
+}
+
+/* Color-blind Mode with Dark theme */
+body.color-blind-mode[data-theme="dark"] {
+  --wave: #55c2da;
+  --wave-rgb: 85, 194, 218; /* RGB values for dark color-blind mode */
+  --sidebar: #2c6c7c;
+}
+
+/* Color-blind Mode with System theme */
+@media (prefers-color-scheme: dark) {
+  body.color-blind-mode[data-using-system-theme="true"] {
+    --wave: #55c2da;
+    --wave-rgb: 85, 194, 218; /* RGB values for system dark color-blind mode */
+    --sidebar: #2c6c7c;
+  }
+}

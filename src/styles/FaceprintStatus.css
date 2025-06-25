@@ -1,0 +1,296 @@
+/* FaceprintStatus.css */
+.faceprint-status-container {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+/* Status Containers */
+.faceprint-status {
+  display: flex;
+  align-items: center;
+  padding: 20px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+/* Not registered - Red styling */
+.faceprint-status.not-registered {
+  background-color: rgba(220, 53, 69, 0.1);
+  border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+body[data-theme="dark"] .faceprint-status.not-registered,
+body[data-using-system-theme="true"] .faceprint-status.not-registered {
+  background-color: rgba(220, 53, 69, 0.15);
+  border: 1px solid rgba(220, 53, 69, 0.4);
+}
+
+/* Pending - Amber styling */
+.faceprint-status.pending {
+  background-color: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+body[data-theme="dark"] .faceprint-status.pending,
+body[data-using-system-theme="true"] .faceprint-status.pending {
+  background-color: rgba(255, 193, 7, 0.15);
+  border: 1px solid rgba(255, 193, 7, 0.4);
+}
+
+/* Verified - Green styling */
+.faceprint-status.verified {
+  background-color: rgba(40, 167, 69, 0.1);
+  border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+body[data-theme="dark"] .faceprint-status.verified,
+body[data-using-system-theme="true"] .faceprint-status.verified {
+  background-color: rgba(40, 167, 69, 0.15);
+  border: 1px solid rgba(40, 167, 69, 0.4);
+}
+
+/* Icon Container */
+.faceprint-icon-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  margin-right: 16px;
+  flex-shrink: 0;
+}
+
+.not-registered .faceprint-icon-container {
+  background-color: rgba(220, 53, 69, 0.15);
+}
+
+.pending .faceprint-icon-container {
+  background-color: rgba(255, 193, 7, 0.15);
+}
+
+.verified .faceprint-icon-container {
+  background-color: rgba(40, 167, 69, 0.15);
+}
+
+body[data-theme="dark"] .not-registered .faceprint-icon-container,
+body[data-using-system-theme="true"] .not-registered .faceprint-icon-container {
+  background-color: rgba(220, 53, 69, 0.2);
+}
+
+body[data-theme="dark"] .pending .faceprint-icon-container,
+body[data-using-system-theme="true"] .pending .faceprint-icon-container {
+  background-color: rgba(255, 193, 7, 0.2);
+}
+
+body[data-theme="dark"] .verified .faceprint-icon-container,
+body[data-using-system-theme="true"] .verified .faceprint-icon-container {
+  background-color: rgba(40, 167, 69, 0.2);
+}
+
+/* Icons */
+.faceprint-icon {
+  width: 32px;
+  height: 32px;
+  fill: currentColor;
+}
+
+.faceprint-icon.warning {
+  color: #dc3545; /* Red */
+}
+
+.faceprint-icon.success {
+  color: #28a745; /* Green */
+}
+
+.faceprint-icon.error {
+  color: #dc3545; /* Red */
+}
+
+/* Content */
+.faceprint-content {
+  flex: 1;
+}
+
+.faceprint-content h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.faceprint-content p {
+  margin: 0 0 16px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #555;
+}
+
+body[data-theme="dark"] .faceprint-content p,
+body[data-using-system-theme="true"] .faceprint-content p {
+  color: #aaa;
+}
+
+.not-registered .faceprint-content h3 {
+  color: #c82333; /* Darker red for better contrast */
+}
+
+.pending .faceprint-content h3 {
+  color: #d39e00; /* Darker amber for better contrast */
+}
+
+.verified .faceprint-content h3 {
+  color: #218838; /* Darker green for better contrast */
+}
+
+body[data-theme="dark"] .not-registered .faceprint-content h3,
+body[data-using-system-theme="true"] .not-registered .faceprint-content h3 {
+  color: #e74c3c; /* Brighter red for dark mode */
+}
+
+body[data-theme="dark"] .pending .faceprint-content h3,
+body[data-using-system-theme="true"] .pending .faceprint-content h3 {
+  color: #f39c12; /* Brighter amber for dark mode */
+}
+
+body[data-theme="dark"] .verified .faceprint-content h3,
+body[data-using-system-theme="true"] .verified .faceprint-content h3 {
+  color: #2ecc71; /* Brighter green for dark mode */
+}
+
+/* Button */
+.faceprint-enroll-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  background-color: #dc3545; /* Red */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.faceprint-enroll-button:hover {
+  background-color: #c82333; /* Darker red */
+  transform: translateY(-1px);
+}
+
+.faceprint-enroll-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.5);
+}
+
+.faceprint-retry-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  background-color: #6c757d; /* Gray */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.faceprint-retry-button:hover {
+  background-color: #5a6268; /* Darker gray */
+}
+
+.faceprint-retry-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(108, 117, 125, 0.5);
+}
+
+/* Loading state */
+.faceprint-status-container.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  background-color: #f8f9fa;
+  text-align: center;
+}
+
+body[data-theme="dark"] .faceprint-status-container.loading,
+body[data-using-system-theme="true"] .faceprint-status-container.loading {
+  background-color: #333;
+}
+
+.loading-text {
+  margin-top: 16px;
+  font-size: 14px;
+  color: #6c757d;
+}
+
+body[data-theme="dark"] .loading-text,
+body[data-using-system-theme="true"] .loading-text {
+  color: #aaa;
+}
+
+/* Error state */
+.faceprint-status-container.error {
+  display: flex;
+  padding: 20px;
+  background-color: rgba(220, 53, 69, 0.1);
+  border: 1px solid rgba(220, 53, 69, 0.3);
+  color: #c82333;
+}
+
+body[data-theme="dark"] .faceprint-status-container.error,
+body[data-using-system-theme="true"] .faceprint-status-container.error {
+  background-color: rgba(220, 53, 69, 0.15);
+  border: 1px solid rgba(220, 53, 69, 0.4);
+  color: #e74c3c;
+}
+
+.error-text {
+  margin: 0 0 12px;
+  font-size: 14px;
+}
+
+/* Spinner */
+.faceprint-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(255, 193, 7, 0.3); /* Amber */
+  border-top-color: #d39e00; /* Darker amber */
+  border-radius: 50%;
+  animation: spinner 1s linear infinite;
+}
+
+@keyframes spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Media queries for better responsiveness */
+@media (max-width: 500px) {
+  .faceprint-status {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .faceprint-icon-container {
+    margin-right: 0;
+    margin-bottom: 12px;
+  }
+  
+  .faceprint-content p {
+    margin-bottom: 12px;
+  }
+  
+  .faceprint-enroll-button,
+  .faceprint-retry-button {
+    width: 100%;
+  }
+}
