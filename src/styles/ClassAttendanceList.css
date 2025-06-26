@@ -115,46 +115,84 @@ body[data-using-system-theme="true"] .class-type {
   color: #c12c2c;
 }
 
-/* Tooltip styling - speech bubble design matching screenshot exactly */
+/* Enhanced tooltip styling - modern clean design */
 .tooltip {
   position: absolute;
-  top: -42px;
+  top: -80px;
   left: 50%;
   transform: translateX(-50%);
-  background-color: #333;
+  background-color: #2a2a2a;
   color: #fff;
-  padding: 8px 15px;
-  border-radius: 6px;
+  padding: 15px 20px;
+  border-radius: 10px;
   font-size: 14px;
-  font-weight: normal;
-  white-space: nowrap;
+  font-weight: 400;
+  min-width: 220px;
   z-index: 10000;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-  animation: tooltipFadeIn 0.15s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  animation: tooltipFadeIn 0.2s ease;
   text-align: center;
+}
+
+.tooltip-header {
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 15px;
+}
+
+.tooltip-details {
+  margin-top: 5px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.tooltip-status {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.tooltip-status.green {
+  background-color: rgba(22, 145, 67, 0.2);
+  color: #2abe68;
+}
+
+.tooltip-status.amber {
+  background-color: rgba(176, 121, 0, 0.2);
+  color: #ffb52e;
+}
+
+.tooltip-status.red {
+  background-color: rgba(193, 44, 44, 0.2);
+  color: #ff5c5c;
 }
 
 .tooltip-arrow {
   position: absolute;
-  bottom: -8px;
+  bottom: -10px;
   left: 50%;
   transform: translateX(-50%);
   width: 0;
   height: 0;
-  border-left: 8px solid transparent;
-  border-right: 8px solid transparent;
-  border-top: 8px solid #333;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid #2a2a2a;
 }
 
-/* Animation for tooltip - subtle and quick fade in */
+/* Animation for tooltip - smooth fade in with slight scale */
 @keyframes tooltipFadeIn {
   from {
     opacity: 0;
-    transform: translateX(-50%) translateY(3px);
+    transform: translateX(-50%) translateY(5px) scale(0.98);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   }
   to {
     opacity: 1;
-    transform: translateX(-50%) translateY(0);
+    transform: translateX(-50%) translateY(0) scale(1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
   }
 }
 

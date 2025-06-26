@@ -1,10 +1,9 @@
 /* StrikeTracker.css */
 .strike-tracker-container {
-  background-color: #fff;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  margin: 16px 0;
+  background-color: transparent;
+  padding: 0;
+  box-shadow: none;
+  margin: 0;
   transition: all 0.3s ease;
   max-width: 100%;
   overflow: hidden;
@@ -153,10 +152,11 @@ body[data-using-system-theme="true"] .strike-count-display {
 .class-pill-selector {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
   border-bottom: 1px solid #f0f0f0;
+  justify-content: flex-start;
 }
 
 body[data-theme="dark"] .class-pill-selector,
@@ -168,7 +168,8 @@ body[data-using-system-theme="true"] .class-pill-selector {
   background-color: #f5f5f5;
   border: none;
   border-radius: 30px;
-  padding: 8px 16px;
+  padding: 6px 14px;
+  font-size: 0.9rem;
   font-size: 0.9rem;
   color: #555;
   cursor: pointer;

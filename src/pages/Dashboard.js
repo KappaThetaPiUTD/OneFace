@@ -56,7 +56,7 @@ export default function Dashboard() {
           />
         </div>
         
-        <div ref={strikeTrackerCardRef} className="card span-2 card-hover theme-transition">
+        <div ref={strikeTrackerCardRef} className="card card-hover theme-transition">
           {/* Enhanced StrikeTracker with class pill selection */}
           <StrikeTracker 
             maxStrikes={3} 
