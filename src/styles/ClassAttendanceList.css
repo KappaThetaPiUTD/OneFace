@@ -1,0 +1,177 @@
+/* ClassAttendanceList.css - Complete rewrite */
+.class-attendance-list {
+  width: 100%;
+}
+
+/* Title styling */
+.class-attendance-list h1 {
+  margin-top: 0;
+  margin-bottom: 24px;
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+}
+
+body[data-theme="dark"] .class-attendance-list h1,
+body[data-using-system-theme="true"] .class-attendance-list h1 {
+  color: #e0e0e0;
+}
+
+/* List container */
+.class-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Row styling */
+.class-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+  z-index: 1; /* Ensure proper stacking for tooltip */
+}
+
+/* Ensure row has a high enough top margin to fit the tooltip above it */
+.class-row:first-child {
+  margin-top: 10px;
+}
+
+body[data-theme="dark"] .class-row,
+body[data-using-system-theme="true"] .class-row {
+  background-color: #333;
+}
+
+.class-row:hover {
+  background-color: #eaeaea;
+  transform: translateX(3px);
+}
+
+body[data-theme="dark"] .class-row:hover,
+body[data-using-system-theme="true"] .class-row:hover {
+  background-color: #3c3c3c;
+}
+
+/* Class name section */
+.class-name-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.class-name {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}
+
+body[data-theme="dark"] .class-name,
+body[data-using-system-theme="true"] .class-name {
+  color: #e0e0e0;
+}
+
+.class-type {
+  font-size: 14px;
+  color: #777;
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 3px 8px;
+  border-radius: 12px;
+  display: inline-block;
+  width: fit-content;
+}
+
+body[data-theme="dark"] .class-type,
+body[data-using-system-theme="true"] .class-type {
+  color: #aaa;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Attendance badge */
+.attendance-badge {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 12px;
+}
+
+.attendance-badge.green {
+  background-color: rgba(22, 145, 67, 0.15);
+  color: #169143;
+}
+
+.attendance-badge.amber {
+  background-color: rgba(176, 121, 0, 0.15);
+  color: #b07900;
+}
+
+.attendance-badge.red {
+  background-color: rgba(193, 44, 44, 0.15);
+  color: #c12c2c;
+}
+
+/* Tooltip styling - speech bubble design matching screenshot exactly */
+.tooltip {
+  position: absolute;
+  top: -42px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: #fff;
+  padding: 8px 15px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: normal;
+  white-space: nowrap;
+  z-index: 10000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  animation: tooltipFadeIn 0.15s ease;
+  text-align: center;
+}
+
+.tooltip-arrow {
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid #333;
+}
+
+/* Animation for tooltip - subtle and quick fade in */
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Responsive styling */
+@media (max-width: 768px) {
+  .class-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .class-name-section {
+    width: 100%;
+  }
+  
+  .tooltip {
+    width: 80%;
+    text-align: center;
+  }
+}

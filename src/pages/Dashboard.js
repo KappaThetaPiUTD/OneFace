@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import StrikeTracker from '../components/StrikeTracker';
+import ClassAttendanceList from '../components/ClassAttendanceList';
 
 export default function Dashboard() {
   // State for selected class (strike count will be managed by admin in the future)
@@ -22,65 +23,37 @@ export default function Dashboard() {
   ];
   
   // Refs for the sections that will be animated
-  const classesCardRef = useRef(null);
-  const attendanceCardRef = useRef(null);
+  const classAttendanceCardRef = useRef(null);
   const managementCardRef = useRef(null);
   const strikeTrackerCardRef = useRef(null);
   
   useEffect(() => {
     // Animation for the cards to fade in
-    const classesCard = classesCardRef.current;
-    const attendanceCard = attendanceCardRef.current;
+    const classAttendanceCard = classAttendanceCardRef.current;
     const managementCard = managementCardRef.current;
     const strikeTrackerCard = strikeTrackerCardRef.current;
     
-    if (classesCard) classesCard.classList.add('slide-up', 'delay-1');
-    if (attendanceCard) attendanceCard.classList.add('slide-up', 'delay-2');
-    if (managementCard) managementCard.classList.add('slide-up', 'delay-3');
-    if (strikeTrackerCard) strikeTrackerCard.classList.add('slide-up', 'delay-4');
-    
-    // Staggered animation for list items
-    const listItems = document.querySelectorAll('.staggered-item');
-    listItems.forEach((item, index) => {
-      setTimeout(() => {
-        item.classList.add('animate-staggered');
-      }, 100 + (index * 70)); // Stagger each item by 70ms
-    });
+    if (classAttendanceCard) classAttendanceCard.classList.add('slide-up', 'delay-1');
+    if (managementCard) managementCard.classList.add('slide-up', 'delay-2');
+    if (strikeTrackerCard) strikeTrackerCard.classList.add('slide-up', 'delay-3');
     
     // Clean up animations on unmount if needed
     return () => {
-      if (classesCard) classesCard.classList.remove('slide-up', 'delay-1');
-      if (attendanceCard) attendanceCard.classList.remove('slide-up', 'delay-2');
-      if (managementCard) managementCard.classList.remove('slide-up', 'delay-3');
-      if (strikeTrackerCard) strikeTrackerCard.classList.remove('slide-up', 'delay-4');
-      
-      listItems.forEach(item => {
-        item.classList.remove('animate-staggered');
-      });
+      if (classAttendanceCard) classAttendanceCard.classList.remove('slide-up', 'delay-1');
+      if (managementCard) managementCard.classList.remove('slide-up', 'delay-2');
+      if (strikeTrackerCard) strikeTrackerCard.classList.remove('slide-up', 'delay-3');
     };
   }, []);
 
   return(
     <>
       <section className="dashboard-grid">
-        <div ref={classesCardRef} className="card card-hover theme-transition">
-          <h1>My Classes &amp; Organizations</h1>
-          {classes.map((c, index) => (
-            <div className="row staggered-item" key={c.name}>
-              <span>{c.name}</span>
-              <span className="label">{c.type}</span>
-            </div>
-          ))}
-        </div>
-
-        <div ref={attendanceCardRef} className="card card-hover theme-transition">
-          <h1>Attendance Analysis</h1>
-          {attendance.map(({code, done, total, percent, cls}, index) => (
-            <div className="row staggered-item" key={code}>
-              <span>{code}</span>
-              <span className={cls}>{done}/{total} {percent}</span>
-            </div>
-          ))}
+        <div ref={classAttendanceCardRef} className="card card-hover theme-transition">
+          <ClassAttendanceList 
+            classes={classes}
+            attendance={attendance}
+            onClassClick={(className) => setSelectedClass(className)}
+          />
         </div>
         
         <div ref={strikeTrackerCardRef} className="card span-2 card-hover theme-transition">
