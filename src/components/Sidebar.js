@@ -46,8 +46,11 @@ export default function Sidebar({ onLogout }) {
           to="/login" 
           Icon={HiOutlineLogout} 
           label="Logout"
-          onClick={() => {
-            if (onLogout) onLogout();
+          onClick={async () => {
+            if (onLogout) {
+              await onLogout();
+              navigate("/login");
+            }
           }} 
         />
       </div>
