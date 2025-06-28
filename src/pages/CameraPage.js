@@ -17,7 +17,7 @@ const CameraPage = () => {
       const mediaStream = await navigator.mediaDevices.getUserMedia({ 
         video: { 
           width: { ideal: 1280 },
-          height: { idgiteal: 720 },
+          height: { ideal: 720 },
           facingMode: 'user'
         }, 
         audio: false 

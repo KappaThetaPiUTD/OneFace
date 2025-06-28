@@ -4,6 +4,7 @@ import Dashboard from "./pages/Dashboard";
 import Calendar from "./pages/Calendar";
 import Settings from "./pages/Settings";
 import CameraPage from "./pages/CameraPage";
+import Login from "./pages/Login";
 
 export default function App() {
   return (
@@ -12,6 +13,7 @@ export default function App() {
       <main className="main">
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/camera" element={<CameraPage />} />
