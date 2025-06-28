@@ -1,0 +1,512 @@
+/* AttendanceDrillDown.css */
+.attendance-drilldown-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  overflow: hidden; /* Prevents content spilling */
+}
+
+body[data-theme="dark"] .attendance-drilldown-container,
+body[data-using-system-theme="true"] .attendance-drilldown-container {
+  background-color: #252525;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Header styling */
+.drilldown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.drilldown-title-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.back-button {
+  background: transparent;
+  border: none;
+  padding: 8px;
+  color: #2196f3;
+  font-weight: 500;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.back-button:hover {
+  color: #1976d2;
+  transform: translateX(-3px);
+}
+
+body[data-theme="dark"] .back-button,
+body[data-using-system-theme="true"] .back-button {
+  color: #64b5f6;
+}
+
+.drilldown-header h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  color: #333;
+}
+
+body[data-theme="dark"] .drilldown-header h2,
+body[data-using-system-theme="true"] .drilldown-header h2 {
+  color: #e0e0e0;
+}
+
+.drilldown-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Filter controls */
+.filter-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-control label {
+  font-size: 14px;
+  color: #555;
+}
+
+body[data-theme="dark"] .filter-control label,
+body[data-using-system-theme="true"] .filter-control label {
+  color: #bbb;
+}
+
+.filter-control select {
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background-color: #f5f5f5;
+  font-size: 14px;
+  color: #333;
+  transition: all 0.2s ease;
+}
+
+.filter-control select:focus {
+  border-color: #2196f3;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+}
+
+body[data-theme="dark"] .filter-control select,
+body[data-using-system-theme="true"] .filter-control select {
+  background-color: #333;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+/* Export button */
+.export-button {
+  padding: 8px 12px;
+  background-color: transparent;
+  border: 1px solid #2196f3;
+  color: #2196f3;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.export-button:hover {
+  background-color: rgba(33, 150, 243, 0.1);
+}
+
+body[data-theme="dark"] .export-button,
+body[data-using-system-theme="true"] .export-button {
+  border-color: #64b5f6;
+  color: #64b5f6;
+}
+
+body[data-theme="dark"] .export-button:hover,
+body[data-using-system-theme="true"] .export-button:hover {
+  background-color: rgba(100, 181, 246, 0.1);
+}
+
+/* Stats summary chips */
+.attendance-stats-summary {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.stat-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 6px;
+  min-width: 80px;
+}
+
+.stat-chip .stat-count {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.stat-chip .stat-label {
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.stat-chip.present {
+  background-color: rgba(22, 145, 67, 0.1);
+}
+
+.stat-chip.present .stat-count {
+  color: #169143;
+}
+
+.stat-chip.present .stat-label {
+  color: #169143;
+}
+
+.stat-chip.tardy {
+  background-color: rgba(176, 121, 0, 0.1);
+}
+
+.stat-chip.tardy .stat-count {
+  color: #b07900;
+}
+
+.stat-chip.tardy .stat-label {
+  color: #b07900;
+}
+
+.stat-chip.absent {
+  background-color: rgba(193, 44, 44, 0.1);
+}
+
+.stat-chip.absent .stat-count {
+  color: #c12c2c;
+}
+
+.stat-chip.absent .stat-label {
+  color: #c12c2c;
+}
+
+body[data-theme="dark"] .stat-chip.present,
+body[data-using-system-theme="true"] .stat-chip.present {
+  background-color: rgba(22, 145, 67, 0.15);
+}
+
+body[data-theme="dark"] .stat-chip.tardy,
+body[data-using-system-theme="true"] .stat-chip.tardy {
+  background-color: rgba(176, 121, 0, 0.15);
+}
+
+body[data-theme="dark"] .stat-chip.absent,
+body[data-using-system-theme="true"] .stat-chip.absent {
+  background-color: rgba(193, 44, 44, 0.15);
+}
+
+/* Table styling */
+.drilldown-table-container {
+  overflow-x: auto;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  scrollbar-width: thin; /* For Firefox */
+  max-width: 100%;
+}
+
+/* Customize scrollbar for webkit browsers */
+.drilldown-table-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.drilldown-table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 6px;
+}
+
+.drilldown-table-container::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 6px;
+}
+
+.drilldown-table-container::-webkit-scrollbar-thumb:hover {
+  background: #aaa;
+}
+
+body[data-theme="dark"] .drilldown-table-container::-webkit-scrollbar-track,
+body[data-using-system-theme="true"] .drilldown-table-container::-webkit-scrollbar-track {
+  background: #333;
+}
+
+body[data-theme="dark"] .drilldown-table-container::-webkit-scrollbar-thumb,
+body[data-using-system-theme="true"] .drilldown-table-container::-webkit-scrollbar-thumb {
+  background: #666;
+}
+
+body[data-theme="dark"] .drilldown-table-container::-webkit-scrollbar-thumb:hover,
+body[data-using-system-theme="true"] .drilldown-table-container::-webkit-scrollbar-thumb:hover {
+  background: #888;
+}
+
+body[data-theme="dark"] .drilldown-table-container,
+body[data-using-system-theme="true"] .drilldown-table-container {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.drilldown-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.drilldown-table th {
+  background-color: #f5f5f5;
+  color: #333;
+  font-weight: 600;
+  text-align: left;
+  padding: 12px 16px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* Define column widths to prevent layout shifts */
+.drilldown-table th:nth-child(1),
+.drilldown-table td:nth-child(1) {
+  width: 25%;
+}
+
+.drilldown-table th:nth-child(2),
+.drilldown-table td:nth-child(2) {
+  width: 55%;
+}
+
+.drilldown-table th:nth-child(3),
+.drilldown-table td:nth-child(3) {
+  width: 20%;
+}
+
+body[data-theme="dark"] .drilldown-table th,
+body[data-using-system-theme="true"] .drilldown-table th {
+  background-color: #333;
+  color: #e0e0e0;
+  border-bottom-color: #444;
+}
+
+.drilldown-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s;
+}
+
+.drilldown-table th.sortable:hover {
+  background-color: #e9e9e9;
+}
+
+body[data-theme="dark"] .drilldown-table th.sortable:hover,
+body[data-using-system-theme="true"] .drilldown-table th.sortable:hover {
+  background-color: #444;
+}
+
+.drilldown-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  vertical-align: top;
+}
+
+body[data-theme="dark"] .drilldown-table td,
+body[data-using-system-theme="true"] .drilldown-table td {
+  border-bottom-color: #333;
+}
+
+.drilldown-table tr.even-row {
+  background-color: #fff;
+}
+
+.drilldown-table tr.odd-row {
+  background-color: #f9f9f9;
+}
+
+body[data-theme="dark"] .drilldown-table tr.even-row,
+body[data-using-system-theme="true"] .drilldown-table tr.even-row {
+  background-color: #252525;
+}
+
+body[data-theme="dark"] .drilldown-table tr.odd-row,
+body[data-using-system-theme="true"] .drilldown-table tr.odd-row {
+  background-color: #2a2a2a;
+}
+
+.drilldown-table tr:hover td {
+  background-color: rgba(33, 150, 243, 0.05);
+}
+
+body[data-theme="dark"] .drilldown-table tr:hover td,
+body[data-using-system-theme="true"] .drilldown-table tr:hover td {
+  background-color: rgba(33, 150, 243, 0.1);
+}
+
+.status-cell {
+  font-weight: 500;
+}
+
+.status-present {
+  color: #169143;
+}
+
+.status-tardy {
+  color: #b07900;
+}
+
+.status-absent {
+  color: #c12c2c;
+}
+
+/* Supports both lowercase and uppercase status values */
+.status-Present {
+  color: #169143;
+}
+
+.status-Tardy {
+  color: #b07900;
+}
+
+.status-Absent {
+  color: #c12c2c;
+}
+
+.no-data {
+  text-align: center;
+  padding: 24px;
+  color: #666;
+}
+
+body[data-theme="dark"] .no-data,
+body[data-using-system-theme="true"] .no-data {
+  color: #999;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .drilldown-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  
+  .drilldown-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .attendance-stats-summary {
+    justify-content: space-between;
+  }
+  
+  .stat-chip {
+    flex: 1;
+  }
+  
+  /* Add scroll indicator for mobile */
+  .drilldown-table-container::after {
+    content: "← Scroll →";
+    display: block;
+    text-align: center;
+    font-size: 12px;
+    color: #888;
+    padding: 4px;
+    margin-top: 4px;
+  }
+  
+  body[data-theme="dark"] .drilldown-table-container::after,
+  body[data-using-system-theme="true"] .drilldown-table-container::after {
+    color: #aaa;
+  }
+}
+
+@media (max-width: 500px) {
+  .attendance-drilldown-container {
+    padding: 16px 12px;
+    border-radius: 4px;
+  }
+  
+  .drilldown-title-section {
+    width: 100%;
+  }
+  
+  .drilldown-header h2 {
+    font-size: 18px;
+  }
+  
+  .back-button {
+    padding: 4px;
+    font-size: 14px;
+  }
+  
+  .drilldown-actions {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .filter-control, 
+  .export-button {
+    width: 100%;
+  }
+  
+  .filter-control {
+    justify-content: space-between;
+  }
+  
+  .filter-control select {
+    flex: 1;
+    margin-left: 8px;
+  }
+  
+  .export-button {
+    text-align: center;
+  }
+  
+  .attendance-stats-summary {
+    gap: 6px;
+  }
+  
+  .stat-chip {
+    min-width: 60px;
+    padding: 6px 10px;
+  }
+  
+  .stat-chip .stat-count {
+    font-size: 18px;
+  }
+  
+  .stat-chip .stat-label {
+    font-size: 10px;
+  }
+  
+  .drilldown-table th,
+  .drilldown-table td {
+    padding: 10px 8px;
+    font-size: 13px;
+  }
+}
