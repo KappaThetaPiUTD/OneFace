@@ -1,3 +1,4 @@
+
 import { useEffect, useRef, useState } from 'react';
 import StrikeTracker from '../components/StrikeTracker';
 import ClassAttendanceList from '../components/ClassAttendanceList';
@@ -48,6 +49,7 @@ export default function Dashboard() {
   return(
     <>
       <section className="dashboard-grid">
+        {/* Left Column: Class Attendance */}
         <div ref={classAttendanceCardRef} className="card card-hover theme-transition">
           <ClassAttendanceList 
             classes={classes}
@@ -56,23 +58,28 @@ export default function Dashboard() {
           />
         </div>
         
-        <div ref={strikeTrackerCardRef} className="card card-hover theme-transition">
-          {/* Enhanced StrikeTracker with class pill selection */}
-          <StrikeTracker 
-            maxStrikes={3} 
-            classes={classes}
-            onClassChange={(classname) => setSelectedClass(classname)}
-          />
-        </div>
-
-        <div ref={managementCardRef} className="card span-2 card-hover theme-transition">
-          <h1>Class Management</h1>
-          <div>
-            <button className="btn btn-hover-effect">Enroll</button>
-            <button className="btn btn-hover-effect">Manage Classes</button>
+        {/* Right Column: Strike Tracker and Management */}
+        <div className="right-column">
+          {/* Strike Tracker */}
+          <div ref={strikeTrackerCardRef} className="card card-hover theme-transition" style={{marginBottom: '24px'}}>
+            <StrikeTracker 
+              maxStrikes={3} 
+              classes={classes}
+              onClassChange={(classname) => setSelectedClass(classname)}
+            />
+          </div>
+          
+          {/* Class Management - Now underneath the Strike Tracker */}
+          <div ref={managementCardRef} className="card card-hover theme-transition">
+            <h2 style={{ fontSize: '24px', marginBottom: '20px' }}>Class Management</h2>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button className="btn btn-hover-effect">Enroll</button>
+              <button className="btn btn-hover-effect">Manage Classes</button>
+            </div>
           </div>
         </div>
       </section>
     </>
   );
 }
+

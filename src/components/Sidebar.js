@@ -5,6 +5,7 @@ import {
   HiOutlineCalendar,
   HiOutlineUserCircle,
   HiOutlineLogout,
+  HiOutlineVideoCamera,
 } from "react-icons/hi";
 import SidebarLink from "./SidebarLink";
 
@@ -38,10 +39,13 @@ export default function Sidebar({ onLogout }) {
         <SidebarLink to="/calendar" Icon={HiOutlineCalendar} label="Calendar" />
       </div>
       <div ref={(el) => (linksRef.current[2] = el)}>
+        <SidebarLink to="/camera" Icon={HiOutlineVideoCamera} label="Camera" />
+      </div>
+      <div ref={(el) => (linksRef.current[3] = el)}>
         <SidebarLink to="/settings" Icon={HiOutlineUserCircle} label="Settings" />
       </div>
       <div className="spacer" />
-      <div ref={(el) => (linksRef.current[3] = el)}>
+      <div ref={(el) => (linksRef.current[4] = el)}>
         <SidebarLink 
           to="/login" 
           Icon={HiOutlineLogout} 
