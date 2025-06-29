@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import Calendar from "./pages/Calendar";
 import Settings from "./pages/Settings";
 import Login from "./pages/Login";
+import CameraPage from "./pages/CameraPage";
 import "./App.css";
 import "./styles/animations.css";
 
@@ -133,6 +134,14 @@ export default function App() {
             element={
               isAuthenticated ? 
                 <Settings /> : 
+                <Navigate to="/login" replace />
+            } 
+          />
+          <Route 
+            path="/camera" 
+            element={
+              isAuthenticated ? 
+                <CameraPage /> : 
                 <Navigate to="/login" replace />
             } 
           />
