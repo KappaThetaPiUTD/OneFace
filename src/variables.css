@@ -1,5 +1,6 @@
 :root {
   --sidebar: #6ba5b7;
+  --sidebar-rgb: 107, 165, 183; /* RGB values for sidebar */
   --wave: #00648a;
   --wave-rgb: 0, 100, 138; /* RGB values for animations */
   --bg: #d9d9d9;
@@ -14,6 +15,7 @@
 /* Dark mode variables */
 body[data-theme="dark"] {
   --sidebar: #2c4759;
+  --sidebar-rgb: 44, 71, 89; /* RGB values for dark mode sidebar */
   --wave: #1e88e5;
   --wave-rgb: 30, 136, 229; /* RGB values for dark mode */
   --bg: #121212;
@@ -25,6 +27,7 @@ body[data-theme="dark"] {
 @media (prefers-color-scheme: dark) {
   body[data-using-system-theme="true"] {
     --sidebar: #2c4759;
+    --sidebar-rgb: 44, 71, 89; /* RGB values for system dark mode sidebar */
     --wave: #1e88e5;
     --wave-rgb: 30, 136, 229; /* RGB values for system dark mode */
     --bg: #121212;
@@ -38,6 +41,7 @@ body.color-blind-mode {
   --wave: #084c61;
   --wave-rgb: 8, 76, 97; /* RGB values for color-blind mode */
   --sidebar: #45818e;
+  --sidebar-rgb: 69, 129, 142; /* RGB values for color-blind mode sidebar */
 }
 
 /* Color-blind Mode with Dark theme */
@@ -45,6 +49,7 @@ body.color-blind-mode[data-theme="dark"] {
   --wave: #55c2da;
   --wave-rgb: 85, 194, 218; /* RGB values for dark color-blind mode */
   --sidebar: #2c6c7c;
+  --sidebar-rgb: 44, 108, 124; /* RGB values for dark color-blind mode sidebar */
 }
 
 /* Color-blind Mode with System theme */
@@ -53,5 +58,6 @@ body.color-blind-mode[data-theme="dark"] {
     --wave: #55c2da;
     --wave-rgb: 85, 194, 218; /* RGB values for system dark color-blind mode */
     --sidebar: #2c6c7c;
+    --sidebar-rgb: 44, 108, 124; /* RGB values for system dark color-blind mode sidebar */
   }
 }
