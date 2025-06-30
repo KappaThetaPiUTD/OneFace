@@ -1,145 +1,41 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import '../styles/AttendanceDrillDown.css';
 
-/**
- * AttendanceDrillDown Component
- * Displays a detailed session-by-session attendance log for a single class
- * 
- * @param {Object} props - Component props
- * @param {string} props.classID - ID of the class to show attendance for
- * @param {string} props.userID - ID of the user whose attendance is being viewed
- * @param {Function} [props.onClose] - Optional callback when the component is closed
- * @returns {JSX.Element} AttendanceDrillDown component
- */
 const AttendanceDrillDown = ({ classID, userID, onClose }) => {
-  // Filter and sort state
+  const [attendanceData, setAttendanceData] = useState([]);
   const [filterStatus, setFilterStatus] = useState('all');
   const [sortField, setSortField] = useState('date');
   const [sortDirection, setSortDirection] = useState('asc');
 
-  // Mock data - will be replaced with API call once backend is ready
-  const mockAttendanceData = useMemo(() => [
-    { 
-      eventID: '1', 
-      eventName: 'Lecture 1: Introduction', 
-      date: '2025-01-13T09:00:00', 
-      status: 'Present' 
-    },
-    { 
-      eventID: '2', 
-      eventName: 'Lecture 2: Basic Principles', 
-      date: '2025-01-15T09:00:00', 
-      status: 'Present' 
-    },
-    { 
-      eventID: '3', 
-      eventName: 'Lecture 3: Core Concepts', 
-      date: '2025-01-20T09:00:00', 
-      status: 'Absent' 
-    },
-    { 
-      eventID: '4', 
-      eventName: 'Lecture 4: Advanced Topics', 
-      date: '2025-01-22T09:00:00', 
-      status: 'Tardy',
-      minutesLate: 7 
-    },
-    { 
-      eventID: '5', 
-      eventName: 'Lecture 5: Practical Applications', 
-      date: '2025-01-27T09:00:00', 
-      status: 'Present' 
-    },
-    { 
-      eventID: '6', 
-      eventName: 'Lecture 6: Case Studies', 
-      date: '2025-01-29T09:00:00', 
-      status: 'Present' 
-    },
-    { 
-      eventID: '7', 
-      eventName: 'Review Session', 
-      date: '2025-02-03T14:00:00', 
-      status: 'Tardy',
-      minutesLate: 12 
-    },
-    { 
-      eventID: '8', 
-      eventName: 'Midterm Exam', 
-      date: '2025-02-05T09:00:00', 
-      status: 'Present' 
-    },
-    { 
-      eventID: '9', 
-      eventName: 'Lecture 7: Intermediate Concepts', 
-      date: '2025-02-10T09:00:00', 
-      status: 'Absent' 
-    },
-    { 
-      eventID: '10', 
-      eventName: 'Lecture 8: Industry Applications', 
-      date: '2025-02-12T09:00:00', 
-      status: 'Present' 
-    },
-    { 
-      eventID: '11', 
-      eventName: 'Lab Session 1', 
-      date: '2025-02-17T14:00:00', 
-      status: 'Present' 
-    },
-    { 
-      eventID: '12', 
-      eventName: 'Lab Session 2', 
-      date: '2025-02-19T14:00:00', 
-      status: 'Present' 
+  useEffect(() => {
+    async function fetchAttendanceData() {
+      try {
+        const response = await fetch(`http://localhost:4000/attendance-history?userId=tester&classId=${classID}`);
+        if (!response.ok) throw new Error('Failed to fetch attendance data');
+        const data = await response.json();
+        setAttendanceData(data);
+      } catch (err) {
+        console.error('Error fetching attendance data:', err);
+      }
     }
-  ], []);
 
-  // TODO: Replace with actual API call
-  // useEffect(() => {
-  //   async function fetchAttendanceData() {
-  //     try {
-  //       const response = await fetch(`/api/attendance?classID=${classID}&userID=${userID}`);
-  //       const data = await response.json();
-  //       setAttendanceData(data);
-  //     } catch (error) {
-  //       console.error('Error fetching attendance data:', error);
-  //     }
-  //   }
-  //   fetchAttendanceData();
-  // }, [classID, userID]);
+    fetchAttendanceData();
+  }, [classID, userID]);
 
-  // Filter data based on selected status
   const filteredData = useMemo(() => {
-    if (filterStatus === 'all') {
-      return mockAttendanceData;
-    }
-    return mockAttendanceData.filter(item => 
-      item.status.toLowerCase() === filterStatus.toLowerCase()
-    );
-  }, [mockAttendanceData, filterStatus]);
+    if (filterStatus === 'all') return attendanceData;
+    return attendanceData.filter(item => item.status?.toLowerCase() === filterStatus);
+  }, [attendanceData, filterStatus]);
 
-  // Sort data based on selected field and direction
   const sortedData = useMemo(() => {
     return [...filteredData].sort((a, b) => {
-      if (sortField === 'date') {
-        const dateA = new Date(a.date);
-        const dateB = new Date(b.date);
-        return sortDirection === 'asc' ? dateA - dateB : dateB - dateA;
-      } else if (sortField === 'eventName') {
-        return sortDirection === 'asc' 
-          ? a.eventName.localeCompare(b.eventName) 
-          : b.eventName.localeCompare(a.eventName);
-      } else if (sortField === 'status') {
-        return sortDirection === 'asc' 
-          ? a.status.localeCompare(b.status) 
-          : b.status.localeCompare(a.status);
-      }
+      if (sortField === 'date') return sortDirection === 'asc' ? new Date(a.date) - new Date(b.date) : new Date(b.date) - new Date(a.date);
+      if (sortField === 'sessionName') return sortDirection === 'asc' ? a.sessionName.localeCompare(b.sessionName) : b.sessionName.localeCompare(a.sessionName);
+      if (sortField === 'status') return sortDirection === 'asc' ? a.status.localeCompare(b.status) : b.status.localeCompare(a.status);
       return 0;
     });
   }, [filteredData, sortField, sortDirection]);
 
-  // Handle sort click
   const handleSort = (field) => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
@@ -149,40 +45,28 @@ const AttendanceDrillDown = ({ classID, userID, onClose }) => {
     }
   };
 
-  // Format date for display
   const formatDate = (dateString) => {
+    if (!dateString) return 'Invalid Date';
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
+    return date.toLocaleDateString('en-US', {
       weekday: 'short',
-      month: 'short', 
+      month: 'short',
       day: 'numeric',
-      year: 'numeric'
+      year: 'numeric',
     });
   };
 
-  // Export current view to CSV
   const exportToCSV = () => {
-    // Headers for CSV
     const headers = ['Date', 'Session', 'Status'];
-    
-    // Convert data to CSV format
     const csvData = sortedData.map(item => [
       formatDate(item.date),
-      item.eventName,
+      item.sessionName,
       item.status + (item.minutesLate ? ` (${item.minutesLate} mins late)` : '')
     ]);
-    
-    // Add headers to the beginning
     csvData.unshift(headers);
-    
-    // Convert to CSV string
-    const csvContent = csvData.map(row => row.join(',')).join('\\n');
-    
-    // Create downloadable link
+    const csvContent = csvData.map(row => row.join(',')).join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
-    
-    // Create temporary link and trigger download
     const link = document.createElement('a');
     link.setAttribute('href', url);
     link.setAttribute('download', `attendance-log-${classID}.csv`);
@@ -192,50 +76,35 @@ const AttendanceDrillDown = ({ classID, userID, onClose }) => {
     document.body.removeChild(link);
   };
 
-  // Get status counts
   const statusCounts = useMemo(() => {
-    const counts = { Present: 0, Tardy: 0, Absent: 0 };
-    mockAttendanceData.forEach(item => {
-      // Convert to lowercase to handle case variations
-      const status = item.status.charAt(0).toUpperCase() + item.status.slice(1).toLowerCase();
-      if (counts[status] !== undefined) {
-        counts[status]++;
-      }
+    const counts = { present: 0, tardy: 0, absent: 0 };
+    attendanceData.forEach(item => {
+      const status = item.status?.toLowerCase();
+      if (counts[status] !== undefined) counts[status]++;
     });
     return counts;
-  }, [mockAttendanceData]);
+  }, [attendanceData]);
 
-  // Get sort icon
   const getSortIcon = (field) => {
     if (sortField !== field) return null;
     return sortDirection === 'asc' ? '↑' : '↓';
   };
 
-  // Get status display text with minutes late for tardy
   const getStatusDisplay = (item) => {
-    const status = item.status.charAt(0).toUpperCase() + item.status.slice(1).toLowerCase();
-    
-    if (status === 'Tardy' && item.minutesLate !== undefined) {
-      return `${status}: ${item.minutesLate} min${item.minutesLate !== 1 ? 's' : ''} late`;
+    if (!item.status) return 'Unknown';
+    if (item.status.toLowerCase() === 'tardy') {
+      return `Tardy: ${item.minutesLate ?? '0'} min${item.minutesLate === 1 ? '' : 's'} late`;
     }
-    
-    return status;
+    return item.status.charAt(0).toUpperCase() + item.status.slice(1).toLowerCase();
   };
 
   return (
     <div className="attendance-drilldown-container">
       <header className="drilldown-header">
         <div className="drilldown-title-section">
-          <button 
-            className="back-button" 
-            onClick={onClose}
-            aria-label="Go back"
-          >
-            ← Back
-          </button>
+          <button className="back-button" onClick={onClose}>← Back</button>
           <h2>Detailed Attendance Log</h2>
         </div>
-        
         <div className="drilldown-actions">
           <div className="filter-control">
             <label htmlFor="status-filter">Filter by:</label>
@@ -244,76 +113,49 @@ const AttendanceDrillDown = ({ classID, userID, onClose }) => {
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
             >
-              <option value="all">All Sessions ({mockAttendanceData.length})</option>
-              <option value="present">Present ({statusCounts.Present})</option>
-              <option value="tardy">Tardy ({statusCounts.Tardy})</option>
-              <option value="absent">Absent ({statusCounts.Absent})</option>
+              <option value="all">All Sessions ({attendanceData.length})</option>
+              <option value="present">Present ({statusCounts.present})</option>
+              <option value="tardy">Tardy ({statusCounts.tardy})</option>
+              <option value="absent">Absent ({statusCounts.absent})</option>
             </select>
           </div>
-          
-          <button 
-            className="export-button"
-            onClick={exportToCSV}
-            aria-label="Export to CSV"
-          >
-            Download CSV
-          </button>
+          <button className="export-button" onClick={exportToCSV}>Download CSV</button>
         </div>
       </header>
-      
+
       <div className="attendance-stats-summary">
         <div className="stat-chip present">
-          <span className="stat-count">{statusCounts.Present}</span>
+          <span className="stat-count">{statusCounts.present}</span>
           <span className="stat-label">Present</span>
         </div>
         <div className="stat-chip tardy">
-          <span className="stat-count">{statusCounts.Tardy}</span>
+          <span className="stat-count">{statusCounts.tardy}</span>
           <span className="stat-label">Tardy</span>
         </div>
         <div className="stat-chip absent">
-          <span className="stat-count">{statusCounts.Absent}</span>
+          <span className="stat-count">{statusCounts.absent}</span>
           <span className="stat-label">Absent</span>
         </div>
       </div>
-      
-      <div className="drilldown-table-container" role="region" aria-label="Attendance records table, scroll horizontally if needed">
+
+      <div className="drilldown-table-container" role="region" aria-label="Attendance records table">
         <table className="drilldown-table">
           <thead>
             <tr>
-              <th 
-                className="sortable"
-                onClick={() => handleSort('date')}
-                aria-sort={sortField === 'date' ? sortDirection : 'none'}
-              >
-                Date {getSortIcon('date')}
-              </th>
-              <th 
-                className="sortable"
-                onClick={() => handleSort('eventName')}
-                aria-sort={sortField === 'eventName' ? sortDirection : 'none'}
-              >
-                Session {getSortIcon('eventName')}
-              </th>
-              <th 
-                className="sortable"
-                onClick={() => handleSort('status')}
-                aria-sort={sortField === 'status' ? sortDirection : 'none'}
-              >
-                Status {getSortIcon('status')}
-              </th>
+              <th onClick={() => handleSort('date')} className="sortable">Date {getSortIcon('date')}</th>
+              <th onClick={() => handleSort('sessionName')} className="sortable">Session {getSortIcon('sessionName')}</th>
+              <th onClick={() => handleSort('status')} className="sortable">Status {getSortIcon('status')}</th>
             </tr>
           </thead>
           <tbody>
             {sortedData.length === 0 ? (
-              <tr>
-                <td colSpan={3} className="no-data">No attendance records found</td>
-              </tr>
+              <tr><td colSpan={3} className="no-data">No attendance records found</td></tr>
             ) : (
               sortedData.map((item, index) => (
-                <tr key={item.eventID} className={index % 2 === 0 ? 'even-row' : 'odd-row'}>
+                <tr key={item.id || item.eventID} className={index % 2 === 0 ? 'even-row' : 'odd-row'}>
                   <td>{formatDate(item.date)}</td>
-                  <td>{item.eventName}</td>
-                  <td className={`status-cell status-${item.status.toLowerCase()}`}>
+                  <td>{item.sessionName}</td>
+                  <td className={`status-cell status-${item.status?.toLowerCase() || 'unknown'}`}>
                     {getStatusDisplay(item)}
                   </td>
                 </tr>
@@ -327,3 +169,4 @@ const AttendanceDrillDown = ({ classID, userID, onClose }) => {
 };
 
 export default AttendanceDrillDown;
+
