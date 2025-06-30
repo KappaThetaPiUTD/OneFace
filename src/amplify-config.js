@@ -16,7 +16,7 @@ const amplifyConfig = {
   API: {
     REST: {
       oneface_gateway: {
-        endpoint: 'https://yns4a3sej4.execute-api.us-east-2.amazonaws.com/default',
+        endpoint: 'https://njs67kowh1.execute-api.us-east-2.amazonaws.com/Dev',
         region: 'us-east-2'
       }
     }
