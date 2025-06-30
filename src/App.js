@@ -19,8 +19,23 @@ export default function App() {
   );
 
   // Check authentication status on app load
-  useEffect(() => {
-    checkAuthStatus();
+ useEffect(() => {
+    const init = async () => {
+      /* ----- FORCE A FRESH SESSION EVERY PAGE LOAD ----- */
+      try {
+        // If the browser still has a Cognito session, wipe it out
+        await signOut();           // add  { global: true }  to sign out of every device
+        localStorage.clear();      // (optional) nuke any custom tokens or userData you stored
+      } catch (err) {
+        // "not authenticated" also lands here – that’s fine
+        console.info("No existing session to clear");
+      }
+
+      /* ----- NOW CHECK WHETHER A USER IS LOGGED IN (should be false) ----- */
+      checkAuthStatus();
+    };
+
+    init();
   }, []);
 
   const checkAuthStatus = async () => {
