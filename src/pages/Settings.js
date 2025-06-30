@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { getCurrentUser, fetchUserAttributes } from 'aws-amplify/auth';
 import "../styles/Settings.css";
 import SettingsIcons from "../components/SettingsIcons";
 import FaceprintStatus from "../components/FaceprintStatus";
@@ -8,8 +9,22 @@ export default function Settings() {
   const [prevTab, setPrevTab] = useState(""); // Track previous tab for animation direction
   const tabs = ["Profile", "Permissions", "Camera", "Billing", "Security", "Notifications", "Integrations"];
   const [isEditing, setIsEditing] = useState(false);
-  const [phone, setPhone] = useState("(555) 123-4567");
-  const [preferredName, setPreferredName] = useState("Johnny");
+  
+  // User profile state from database
+  const [userProfile, setUserProfile] = useState(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [currentUser, setCurrentUser] = useState(null);
+  
+  // Editable fields state
+  const [phone, setPhone] = useState("");
+  const [preferredName, setPreferredName] = useState("");
+  
+  // Profile image upload state
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [profileImageUrl, setProfileImageUrl] = useState("/images/aashay.png");
+  const [uploadError, setUploadError] = useState("");
+  const [uploadSuccess, setUploadSuccess] = useState("");
+  
   const [systemThemeIsDark, setSystemThemeIsDark] = useState(
     window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
   );
@@ -135,6 +150,231 @@ export default function Settings() {
     }, 50);
   };
 
+  // Profile image upload handler with better debugging
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      setUploadError('Please select a JPEG, PNG, or WebP image file.');
+      setTimeout(() => setUploadError(''), 5000);
+      return;
+    }
+
+    // Validate file size (5MB limit)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      setUploadError('File size must be less than 5MB.');
+      setTimeout(() => setUploadError(''), 5000);
+      return;
+    }
+
+    setIsUploadingImage(true);
+    setUploadError('');
+    setUploadSuccess('');
+
+    try {
+      // Get user email for the upload
+      const userEmail = currentUser?.attributes?.email || 
+                       currentUser?.email || 
+                       currentUser?.signInDetails?.loginId;
+
+      if (!userEmail) {
+        throw new Error('User email not found. Please try logging in again.');
+      }
+
+      console.log('🖼️ Uploading profile image for user:', userEmail);
+      console.log('📁 File details:', {
+        name: file.name,
+        size: file.size,
+        type: file.type
+      });
+
+      // Create form data
+      const formData = new FormData();
+      formData.append('image', file);
+
+      // Upload to your Lambda function
+      const uploadUrl = `https://njs67kowh1.execute-api.us-east-2.amazonaws.com/Dev/upload-url?email=${encodeURIComponent(userEmail)}`;
+      console.log('🔗 Upload URL:', uploadUrl);
+      
+      console.log('📤 Starting upload request...');
+      
+      const response = await fetch(uploadUrl, {
+        method: 'POST',
+        body: formData,
+        // Don't set Content-Type header - let browser set it with boundary
+      });
+
+      console.log('📨 Response received:', {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries())
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('✅ Image uploaded successfully:', result);
+        
+        // Update the profile image URL with cache busting
+        if (result.data?.imageUrl) {
+          const imageUrlWithCacheBust = `${result.data.imageUrl}?t=${Date.now()}`;
+          console.log('🖼️ Setting new profile image URL:', imageUrlWithCacheBust);
+          setProfileImageUrl(imageUrlWithCacheBust);
+          
+          // Test if the image is accessible
+          const testImage = new Image();
+          testImage.onload = () => {
+            console.log('✅ Image is accessible from S3');
+          };
+          testImage.onerror = () => {
+            console.error('❌ Image not accessible from S3 URL:', imageUrlWithCacheBust);
+            // Try the regional URL if available
+            if (result.data?.regionalUrl) {
+              const regionalUrlWithCache = `${result.data.regionalUrl}?t=${Date.now()}`;
+              console.log('🔄 Trying regional URL:', regionalUrlWithCache);
+              setProfileImageUrl(regionalUrlWithCache);
+            }
+          };
+          testImage.src = imageUrlWithCacheBust;
+        }
+        
+        setUploadSuccess('Profile image updated successfully!');
+        setTimeout(() => setUploadSuccess(''), 5000);
+      } else {
+        const responseText = await response.text();
+        console.error('❌ Upload failed response:', responseText);
+        
+        let errorMessage = 'Upload failed';
+        try {
+          const errorData = JSON.parse(responseText);
+          errorMessage = errorData.error || errorMessage;
+        } catch (e) {
+          errorMessage = responseText || errorMessage;
+        }
+        
+        throw new Error(errorMessage);
+      }
+    } catch (error) {
+      console.error('💥 Upload error:', error);
+      setUploadError(`Upload failed: ${error.message}`);
+      setTimeout(() => setUploadError(''), 5000);
+    } finally {
+      setIsUploadingImage(false);
+      // Clear the file input
+      event.target.value = '';
+    }
+  };
+
+  // Trigger file input click
+  const triggerImageUpload = () => {
+    const fileInput = document.getElementById('profile-image-input');
+    fileInput?.click();
+  };
+
+  // API base URL
+  const API_BASE_URL = 'https://9g63csumjh.execute-api.us-east-2.amazonaws.com/dev';
+
+  // Fetch current user from Cognito and get actual email
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const user = await getCurrentUser();
+        console.log('Current Cognito user:', user);
+        
+        // Fetch user attributes to get the actual email
+        const attributes = await fetchUserAttributes();
+        console.log('🔍 User attributes from Cognito:', attributes);
+        console.log('📧 Actual email from attributes:', attributes.email);
+        
+        // Set the user with the fetched attributes
+        setCurrentUser({
+          ...user,
+          attributes: attributes
+        });
+        
+      } catch (error) {
+        console.error('Error fetching current user:', error);
+      }
+    };
+    
+    fetchCurrentUser();
+  }, []);
+
+  // Fetch user profile from database
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      // Get email from multiple possible locations in Cognito user
+      const userEmail = currentUser?.attributes?.email || 
+                       currentUser?.email || 
+                       currentUser?.signInDetails?.loginId;
+      
+      if (!userEmail) {
+        console.warn('⚠️ No email found for current user:', currentUser);
+        setIsLoadingProfile(false);
+        return;
+      }
+      
+      setIsLoadingProfile(true);
+      try {
+        console.log('🔄 Fetching user profile for email:', userEmail);
+        
+        const url = `${API_BASE_URL}/user/profile?email=${encodeURIComponent(userEmail)}`;
+        
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('✅ User profile fetched:', data);
+          setUserProfile(data);
+          
+          // Set editable fields with existing data or defaults
+          setPhone(data.Phone || "(555) 123-4567");
+          setPreferredName(data.PreferredName || data.Name || "");
+        } else {
+          console.error('❌ Failed to fetch user profile:', response.status);
+          const errorText = await response.text();
+          console.error('Error details:', errorText);
+          
+          // Set default profile data if fetch fails
+          setUserProfile({
+            username: currentUser.username,
+            Email: userEmail,
+            Name: currentUser.attributes?.name || "Unknown User",
+            RoleID: "Student",
+            EnrollmentDate: new Date().toISOString(),
+            FacePrintID: ""
+          });
+        }
+      } catch (error) {
+        console.error('💥 Error fetching user profile:', error);
+        
+        // Set default profile data if fetch fails
+        setUserProfile({
+          username: currentUser.username,
+          Email: userEmail,
+          Name: currentUser.attributes?.name || "Unknown User",
+          RoleID: "Student",
+          EnrollmentDate: new Date().toISOString(),
+          FacePrintID: ""
+        });
+      } finally {
+        setIsLoadingProfile(false);
+      }
+    };
+
+    if (currentUser) {
+      fetchUserProfile();
+    }
+  }, [currentUser]);
+
   return (
     <section className="settings-container theme-transition">
       <h1 className="settings-title">Account Settings</h1>
@@ -165,88 +405,155 @@ export default function Settings() {
                 <div className="avatar-container">
                   <div className="avatar theme-transition">
                     <img 
-                      src="/images/aashay.png" 
+                      src={profileImageUrl} 
                       alt="Profile" 
                       style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
+                      onError={(e) => {
+                        // Fallback to default image if S3 image fails to load
+                        e.target.src = "/images/aashay.png";
+                      }}
                     />
+                    {isUploadingImage && (
+                      <div className="upload-overlay">
+                        <div className="upload-spinner"></div>
+                      </div>
+                    )}
                   </div>
-                  <button className="btn avatar-btn btn-hover-effect">
-                    Change Avatar
+                  <button 
+                    className="btn avatar-btn btn-hover-effect" 
+                    onClick={triggerImageUpload}
+                    disabled={isUploadingImage}
+                  >
+                    {isUploadingImage ? 'Uploading...' : 'Change Avatar'}
                   </button>
+                  <input 
+                    type="file" 
+                    id="profile-image-input"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={handleImageUpload}
+                    style={{ display: 'none' }}
+                  />
+                  
+                  {/* Upload status messages */}
+                  {uploadError && (
+                    <div className="upload-message error">
+                      ❌ {uploadError}
+                    </div>
+                  )}
+                  {uploadSuccess && (
+                    <div className="upload-message success">
+                      ✅ {uploadSuccess}
+                    </div>
+                  )}
                 </div>
 
                 {/* text details */}
                 <div className="profile-details">
-                  <h2>John Doe</h2>
-                  
-                  <div className="settings-section theme-transition">
-                    <div className="setting-row">
-                      <div className="setting-label">Email:</div>
-                      <div className="setting-value">john.doe@utdallas.edu</div>
+                  {isLoadingProfile ? (
+                    <div className="loading-profile">
+                      <h2>Loading Profile...</h2>
+                      <div className="loading-spinner"></div>
                     </div>
-                    
-                    <div className="setting-row">
-                      <div className="setting-label">School:</div>
-                      <div className="setting-value">University of Texas at Dallas</div>
-                    </div>
-                    
-                    <div className="setting-row">
-                      <div className="setting-label">Major:</div>
-                      <div className="setting-value">Computer Science</div>
-                    </div>
-                  </div>
-                  
-                  <div className="settings-section theme-transition">
-                    <h3 className="section-title">Personal Information</h3>
-                    
-                    <div className="setting-row editable">
-                      <div className="setting-label">Phone:</div>
-                      <div className="setting-value">
-                        {isEditing ? (
-                          <input 
-                            type="text" 
-                            value={phone} 
-                            onChange={(e) => setPhone(e.target.value)} 
-                            className="theme-transition"
-                          />
-                        ) : (
-                          <div>{phone}</div>
+                  ) : (
+                    <>
+                      <h2>{userProfile?.Name || "Unknown User"}</h2>
+                      
+                      <div className="settings-section theme-transition">
+                        <div className="setting-row">
+                          <div className="setting-label">Username:</div>
+                          <div className="setting-value">{userProfile?.username || "N/A"}</div>
+                        </div>
+                        
+                        <div className="setting-row">
+                          <div className="setting-label">Email:</div>
+                          <div className="setting-value">{userProfile?.Email || "No email provided"}</div>
+                        </div>
+                        
+                        <div className="setting-row">
+                          <div className="setting-label">Role:</div>
+                          <div className="setting-value">{userProfile?.RoleID || "Student"}</div>
+                        </div>
+                        
+                        <div className="setting-row">
+                          <div className="setting-label">User ID:</div>
+                          <div className="setting-value">{userProfile?.userID || "N/A"}</div>
+                        </div>
+                        
+                        <div className="setting-row">
+                          <div className="setting-label">Enrollment Date:</div>
+                          <div className="setting-value">
+                            {userProfile?.EnrollmentDate 
+                              ? new Date(userProfile.EnrollmentDate).toLocaleDateString()
+                              : "N/A"
+                            }
+                          </div>
+                        </div>
+                        
+                        {userProfile?.FacePrintID && (
+                          <div className="setting-row">
+                            <div className="setting-label">Face Print Status:</div>
+                            <div className="setting-value">
+                              <span className="status-badge registered">Registered</span>
+                            </div>
+                          </div>
                         )}
                       </div>
-                    </div>
-                    
-                    <div className="setting-row editable">
-                      <div className="setting-label">Preferred Name:</div>
-                      <div className="setting-value">
+                      
+                      <div className="settings-section theme-transition">
+                        <h3 className="section-title">Personal Information</h3>
+                        
+                        <div className="setting-row editable">
+                          <div className="setting-label">Phone:</div>
+                          <div className="setting-value">
+                            {isEditing ? (
+                              <input 
+                                type="text" 
+                                value={phone} 
+                                onChange={(e) => setPhone(e.target.value)} 
+                                className="theme-transition"
+                                placeholder="Enter phone number"
+                              />
+                            ) : (
+                              <div>{phone || "Not provided"}</div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div className="setting-row editable">
+                          <div className="setting-label">Preferred Name:</div>
+                          <div className="setting-value">
+                            {isEditing ? (
+                              <input 
+                                type="text" 
+                                value={preferredName} 
+                                onChange={(e) => setPreferredName(e.target.value)} 
+                                className="theme-transition"
+                                placeholder="Enter preferred name"
+                              />
+                            ) : (
+                              <div>{preferredName || userProfile?.Name || "Not set"}</div>
+                            )}
+                          </div>
+                        </div>
+                        
                         {isEditing ? (
-                          <input 
-                            type="text" 
-                            value={preferredName} 
-                            onChange={(e) => setPreferredName(e.target.value)} 
-                            className="theme-transition"
-                          />
+                          <button 
+                            className="save-btn btn-hover-effect" 
+                            onClick={toggleEditing}
+                          >
+                            Save Changes
+                          </button>
                         ) : (
-                          <div>{preferredName}</div>
+                          <button 
+                            className="edit-btn-large btn-hover-effect" 
+                            onClick={toggleEditing}
+                          >
+                            Edit Information
+                          </button>
                         )}
                       </div>
-                    </div>
-                    
-                    {isEditing ? (
-                      <button 
-                        className="save-btn btn-hover-effect" 
-                        onClick={toggleEditing}
-                      >
-                        Save Changes
-                      </button>
-                    ) : (
-                      <button 
-                        className="edit-btn-large btn-hover-effect" 
-                        onClick={toggleEditing}
-                      >
-                        Edit Information
-                      </button>
-                    )}
-                  </div>
+                    </>
+                  )}
                   
                   <div className="settings-section theme-transition">
                     <h3 className="section-title">Theme Preferences</h3>

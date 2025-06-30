@@ -558,3 +558,169 @@ body[data-using-system-theme="true"] .demo-btn.active {
   min-height: 400px;
   color: var(--settings-text-muted);
 }
+
+/* Loading Profile Styles */
+.loading-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  color: var(--text-secondary);
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border-light);
+  border-top: 3px solid var(--wave);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Status Badge Styles */
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.registered {
+  background: var(--success-bg, rgba(34, 197, 94, 0.1));
+  color: var(--success-color, #169143);
+  border: 1px solid var(--success-color, #169143);
+}
+
+.status-badge.pending {
+  background: var(--warning-bg, rgba(251, 191, 36, 0.1));
+  color: var(--warning-color, #f59e0b);
+  border: 1px solid var(--warning-color, #f59e0b);
+}
+
+.status-badge.not-registered {
+  background: var(--error-bg, rgba(239, 68, 68, 0.1));
+  color: var(--error-color, #dc2626);
+  border: 1px solid var(--error-color, #dc2626);
+}
+
+/* Dark mode adjustments for new styles */
+body[data-theme="dark"] .loading-profile {
+  color: #b0b0b0;
+}
+
+body[data-theme="dark"] .loading-spinner {
+  border-color: #333;
+  border-top-color: var(--wave);
+}
+
+@media (prefers-color-scheme: dark) {
+  body[data-using-system-theme="true"] .loading-profile {
+    color: #b0b0b0;
+  }
+
+  body[data-using-system-theme="true"] .loading-spinner {
+    border-color: #333;
+    border-top-color: var(--wave);
+  }
+}
+
+/* Upload overlay and spinner styles */
+.upload-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.upload-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top: 3px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Upload status messages */
+.upload-message {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-align: center;
+  animation: fadeIn 0.3s ease-in;
+}
+
+.upload-message.success {
+  background: var(--success-bg, rgba(34, 197, 94, 0.1));
+  color: var(--success-color, #059669);
+  border: 1px solid var(--success-color, #059669);
+}
+
+.upload-message.error {
+  background: var(--error-bg, rgba(239, 68, 68, 0.1));
+  color: var(--error-color, #dc2626);
+  border: 1px solid var(--error-color, #dc2626);
+}
+
+/* Avatar container positioning */
+.avatar-container {
+  position: relative;
+}
+
+.avatar {
+  position: relative;
+}
+
+/* Disabled button state */
+.avatar-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Dark mode adjustments for upload styles */
+body[data-theme="dark"] .upload-message.success {
+  background: rgba(34, 197, 94, 0.2);
+  color: #10b981;
+}
+
+body[data-theme="dark"] .upload-message.error {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+@media (prefers-color-scheme: dark) {
+  body[data-using-system-theme="true"] .upload-message.success {
+    background: rgba(34, 197, 94, 0.2);
+    color: #10b981;
+  }
+
+  body[data-using-system-theme="true"] .upload-message.error {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+  }
+}
+
+/* Animations */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
