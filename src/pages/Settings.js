@@ -4,12 +4,11 @@ import SettingsIcons from "../components/SettingsIcons";
 import FaceprintStatus from "../components/FaceprintStatus";
 
 export default function Settings() {
+  // sample userID for now
   const [tab, setTab] = useState("Profile");
   const [prevTab, setPrevTab] = useState(""); // Track previous tab for animation direction
   const tabs = ["Profile", "Permissions", "Camera", "Billing", "Security", "Notifications", "Integrations"];
   const [isEditing, setIsEditing] = useState(false);
-  const [phone, setPhone] = useState("(555) 123-4567");
-  const [preferredName, setPreferredName] = useState("Johnny");
   const [systemThemeIsDark, setSystemThemeIsDark] = useState(
     window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
   );
@@ -43,6 +42,27 @@ export default function Settings() {
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
+
+  // Pull data from the backend 
+  const userId = "tester"
+  const [email, setEmail] = useState("Email Not Found");
+  const [name, setName] = useState("Name Not Found");
+  const [phone, setPhone] = useState("Phone Not Found");
+  const [preferredName, setPreferredName] = useState("Error");
+
+  useEffect(() => {
+  fetch(`http://localhost:4000/user/${userId}`)
+    .then((res) => res.json())
+    .then((data) => {
+      if (data) {
+        setEmail(data.Email || "");
+        setName(data.Name || "");
+        setPhone(data.Phone || "");
+        setPreferredName(data.PreferredName || "");
+      }
+    })
+    .catch((err) => console.error("Error fetching user:", err));
+}, [userId]);
   
   // Apply theme to document
   useEffect(() => {
@@ -177,12 +197,12 @@ export default function Settings() {
 
                 {/* text details */}
                 <div className="profile-details">
-                  <h2>John Doe</h2>
+                  <h2>{name}</h2>
                   
                   <div className="settings-section theme-transition">
                     <div className="setting-row">
                       <div className="setting-label">Email:</div>
-                      <div className="setting-value">john.doe@utdallas.edu</div>
+                      <div className="setting-value">{email}</div>
                     </div>
                     
                     <div className="setting-row">

@@ -1,37 +1,56 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../styles/ClassAttendanceList.css';
 
-/**
- * ClassAttendanceList Component
- * 
- * Displays a list of classes with attendance percentages and tooltips on hover
- * showing missed classes fraction
- * 
- * @param {Object} props - Component props
- * @param {Array} props.classes - Array of class objects { name, type }
- * @param {Array} props.attendance - Array of attendance objects { code, done, total, percent, cls }
- * @param {Function} props.onClassClick - Optional callback when a class is clicked
- * @returns {JSX.Element} ClassAttendanceList component
- */
-const ClassAttendanceList = ({ classes, attendance, onClassClick }) => {
-  // State for tracking tooltips
+const ClassAttendanceList = ({ onClassClick }) => {
   const [hoveredClass, setHoveredClass] = useState(null);
-  
-  // Process and merge class & attendance data with enhanced information
+  const [classes, setClasses] = useState([]);
+  const [attendance, setAttendance] = useState([]);
+
+  const userId = 'tester';
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [classesRes, attendanceRes] = await Promise.all([
+          fetch(`http://localhost:4000/user/${userId}/classes`),
+          fetch(`http://localhost:4000/user/${userId}/attendance`)
+        ]);
+
+        const classesData = await classesRes.json();
+        const attendanceData = await attendanceRes.json();
+
+        setClasses(classesData.map(cls => ({
+          name: cls.className,
+          type: "Classes"
+        })));
+
+        setAttendance(attendanceData.map(item => ({
+          code: item.className,
+          done: item.attended,
+          total: item.total,
+          percent: item.percent,
+          cls: item.cls
+        })));
+      } catch (error) {
+        console.error("Error fetching class attendance data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   const mergedData = classes.map(classItem => {
     const attendanceData = attendance.find(a => a.code === classItem.name) || 
-      { done: 0, total: 0, percent: '0%', cls: '' };
-    
-    // Calculate missed classes directly
+      { done: 0, total: 0, percent: 'N/A', cls: 'gray' };
+
     const missed = attendanceData.total - attendanceData.done;
-    
-    // Calculate attendance percentage as a number for additional calculations
-    const attendanceRate = attendanceData.done / attendanceData.total * 100;
-    
-    // Get status message and recommendation based on attendance rate
+    const attendanceRate = attendanceData.total > 0
+      ? (attendanceData.done / attendanceData.total * 100).toFixed(0)
+      : 'N/A';
+
     let statusMessage = '';
     let recommendation = '';
-    
+
     if (attendanceData.cls === 'green') {
       statusMessage = 'Excellent';
       recommendation = 'Keep up the great attendance!';
@@ -42,78 +61,55 @@ const ClassAttendanceList = ({ classes, attendance, onClassClick }) => {
       statusMessage = 'Needs Attention';
       recommendation = 'Contact your instructor about your attendance.';
     }
-    
+
     return {
-      id: classItem.name, // Use name as unique ID
+      id: classItem.name,
       name: classItem.name,
       type: classItem.type,
-      attendancePercent: attendanceData.percent,
-      attendanceRate: attendanceRate, // Numeric value
-      missed: missed,
+      attendancePercent: attendanceRate === 'N/A' ? 'N/A' : `${attendanceRate}%`,
+      attendanceRate,
+      missed,
       total: attendanceData.total,
-      colorClass: attendanceData.cls,
-      statusMessage: statusMessage,
-      recommendation: recommendation,
-      // Calculate classes remaining before a grade penalty (if applicable)
-      classesRemaining: Math.max(0, attendanceData.total - missed - Math.floor(attendanceData.total * 0.7))
+      colorClass: attendanceData.cls || "gray",
+      statusMessage,
+      recommendation,
     };
   });
-
-  // Handle mouse events
-  const handleMouseEnter = (classId) => {
-    setHoveredClass(classId);
-  };
-  
-  const handleMouseLeave = () => {
-    setHoveredClass(null);
-  };
 
   return (
     <div className="class-attendance-list">
       <h1>My Classes &amp; Organizations</h1>
-      
+
       <div className="class-list">
         {mergedData.map((item) => (
-          <div 
+          <div
             className="class-row"
             key={item.id}
             onClick={() => onClassClick && onClassClick(item.name)}
-            onMouseEnter={() => handleMouseEnter(item.id)}
-            onMouseLeave={handleMouseLeave}
+            onMouseEnter={() => setHoveredClass(item.id)}
+            onMouseLeave={() => setHoveredClass(null)}
           >
-            {/* Left side: Class name */}
             <div className="class-name-section">
               <div className="class-name">{item.name}</div>
               <div className="class-type">{item.type}</div>
             </div>
-            
-            {/* Right side: Attendance percentage */}
+
             <div className={`attendance-badge ${item.colorClass}`}>
               {item.attendancePercent}
             </div>
-            
-            {/* Enhanced tooltip with comprehensive attendance information */}
+
             {hoveredClass === item.id && (
               <div className="tooltip">
-                <div className="tooltip-header">
-                  {item.name} Attendance
-                </div>
-                <div>
-                  Classes missed: {item.missed} / {item.total}
-                </div>
+                <div className="tooltip-header">{item.name} Attendance</div>
+                <div>Classes missed: {item.missed} / {item.total}</div>
                 <div className="tooltip-details">
                   Attendance rate: {item.attendancePercent}
-                  {item.classesRemaining > 0 && item.colorClass !== 'green' && (
-                    <div style={{marginTop: '5px'}}>
-                      Classes remaining before penalty: {item.classesRemaining}
-                    </div>
-                  )}
                 </div>
                 <div className={`tooltip-status ${item.colorClass}`}>
                   {item.statusMessage}
                 </div>
                 {item.recommendation && (
-                  <div className="tooltip-details" style={{marginTop: '5px', fontStyle: 'italic'}}>
+                  <div className="tooltip-details" style={{ marginTop: '5px', fontStyle: 'italic' }}>
                     {item.recommendation}
                   </div>
                 )}

@@ -1,0 +1,89 @@
+/* Calendar.css */
+
+.calendar-card {
+  padding: 2rem;
+  background-color: #f9f9f9;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+}
+
+.calendar-title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+.calendar-table {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.calendar-column {
+  flex: 1;
+  min-width: 320px;
+}
+
+.calendar-header {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.calendar-row {
+  background-color: #f4f4f4;
+  border-radius: 0.5rem;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.95rem;
+}
+
+.class-block {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.25rem 1.5rem;
+}
+
+.class-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.class-title {
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.class-time,
+.class-location {
+  font-size: 0.875rem;
+  color: #555;
+}
+
+.class-tag {
+  font-size: 0.9rem;
+  color: #555;
+  margin-left: 1rem;
+  white-space: nowrap;
+}
+
+.attendance-rate {
+  font-weight: 500;
+}
+
+.text-green {
+  color: green;
+}
+
+.text-amber {
+  color: orange;
+}
+
+.text-red {
+  color: red;
+}
