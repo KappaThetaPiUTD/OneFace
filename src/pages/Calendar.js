@@ -1,5 +1,6 @@
-import { useState } from "react";
-import AttendanceHistory from "../components/AttendanceHistory";
+import { useState, useEffect } from "react";
+import { getCurrentUser } from 'aws-amplify/auth';
+import OrganizationAttendanceDetail from "../components/OrganizationAttendanceDetail";
 
 export default function Calendar() {
   const currentDate = new Date(2025, 5, 20); // June 20, 2025
@@ -9,94 +10,121 @@ export default function Calendar() {
   const [hoveredClass, setHoveredClass] = useState(null);
   const [showAttendanceHistory, setShowAttendanceHistory] = useState(false);
   const [selectedClassDetails, setSelectedClassDetails] = useState(null);
+  const [organizations, setOrganizations] = useState([]);
+  const [organizationsLoading, setOrganizationsLoading] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   
-  // Sample class schedule data with attendance tracking
-  const classSchedule = {
-    "CS 3162.002": { 
-      time: "9:00 AM – 10:15 AM", 
-      location: "ECSN 2.110", 
-      days: [1, 3], 
-      attendanceStatus: "present", 
-      lastAttended: "2025-06-19",
-      minutesLate: 0
-    },
-    "CS 4347.001": { 
-      time: "11:30 AM – 12:45 PM", 
-      location: "ECSS 2.306", 
-      days: [1, 3], 
-      attendanceStatus: "absent",
-      lastAttended: "2025-06-17",
-      minutesLate: 0
-    },
-    "CS 4365.003": { 
-      time: "2:00 PM – 3:15 PM", 
-      location: "SLC 1.204", 
-      days: [2, 4], 
-      attendanceStatus: "tardy",
-      lastAttended: "2025-06-18",
-      minutesLate: 7
-    },
-    "MKT 3300.001": { 
-      time: "4:00 PM – 5:15 PM", 
-      location: "JSOM 1.118", 
-      days: [2, 4], 
-      attendanceStatus: "present",
-      lastAttended: "2025-06-18",
-      minutesLate: 0
-    },
-    "ACM Projects": { 
-      time: "6:00 PM – 7:30 PM", 
-      location: "ECSS 4.619", 
-      days: [5], 
-      attendanceStatus: "tardy",
-      lastAttended: "2025-06-14",
-      minutesLate: 12
-    },
-  };
+  // API base URL
+  const API_BASE_URL = 'https://9g63csumjh.execute-api.us-east-2.amazonaws.com/dev';
 
-  // More evenly distributed events across the month
-  const eventsByDate = {
-    3: [
-      { time: "10:30 AM – 11:45 AM", title: "Career Planning Workshop", location: "Career Center", type: "workshop" }
-    ],
-    5: [
-      { time: "9:00 AM – 10:15 AM", title: "CS 3162.002 Lecture", location: "ECSN 2.110", type: "class" }
-    ],
-    7: [
-      { time: "3:30 PM – 5:00 PM", title: "Student Council Meeting", location: "Student Union 2.204", type: "meeting" }
-    ],
-    9: [
-      { time: "11:30 AM – 12:45 PM", title: "CS 4347.001 Lecture", location: "ECSS 2.306", type: "class" }
-    ],
-    10: [
-      { time: "5:00 PM – 6:30 PM", title: "Coding Competition Prep", location: "ECSS 4.619", type: "club" }
-    ],
-    12: [
-      { time: "2:00 PM – 3:15 PM", title: "CS 4365.003 Lecture", location: "SLC 1.204", type: "class" }
-    ],
-    15: [
-      { time: "9:00 AM – 10:15 AM", title: "CS 3162.002 Lecture", location: "ECSN 2.110", type: "class" }
-    ],
-    17: [
-      { time: "2:00 PM – 3:15 PM", title: "CS 4365.003 Lecture", location: "SLC 1.204", type: "class" },
-      { time: "5:00 PM – 6:00 PM", title: "Academic Advising", location: "ECSS 2.300", type: "appointment" }
-    ],
-    20: [
-      { time: "10:00 AM – 11:30 AM", title: "Database Project Meeting", location: "Virtual - Zoom", type: "meeting" }
-    ],
-    22: [
-      { time: "9:00 AM – 10:15 AM", title: "CS 3162.002 Lecture", location: "ECSN 2.110", type: "class" }
-    ],
-    24: [
-      { time: "2:00 PM – 3:15 PM", title: "CS 4365.003 Lecture", location: "SLC 1.204", type: "class" }
-    ],
-    26: [
-      { time: "1:00 PM – 3:00 PM", title: "Research Symposium", location: "JSOM Davidson Auditorium", type: "event" }
-    ],
-    28: [
-      { time: "6:00 PM – 8:00 PM", title: "Hackathon Kickoff", location: "ECSS 2.415", type: "event" }
-    ],
-  };
+  // Fetch current user
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const user = await getCurrentUser();
+        setCurrentUser(user);
+        console.log('Current user:', user);
+      } catch (error) {
+        console.error('Error fetching current user:', error);
+      }
+    };
+    
+    fetchCurrentUser();
+  }, []);
+
+  // Fetch organizations dynamically
+  useEffect(() => {
+    const fetchOrganizations = async () => {
+      setOrganizationsLoading(true);
+      try {
+        const userID = currentUser?.userId || '';
+        const url = `${API_BASE_URL}/organizations${userID ? `?userID=${userID}` : ''}`;
+        
+        console.log('🔄 Fetching organizations from:', url);
+        
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('✅ Organizations fetched:', data);
+          setOrganizations(data.organizations || []);
+        } else {
+          console.error('❌ Failed to fetch organizations:', response.status);
+          // Fallback to default organization
+          setOrganizations([{
+            id: 'kappa-theta-pi',
+            name: 'Kappa Theta Pi Frat',
+            type: 'organization',
+            eventID: 1,
+            totalMembers: 0,
+            presentMembers: 0,
+            attendanceRate: 0,
+            meetingTime: '7:00 PM - 9:00 PM',
+            location: 'Greek Life Center',
+            nextMeeting: 'Every Thursday',
+            userStatus: 'absent'
+          }]);
+        }
+      } catch (error) {
+        console.error('💥 Error fetching organizations:', error);
+        // Fallback to default organization
+        setOrganizations([{
+          id: 'kappa-theta-pi',
+          name: 'Kappa Theta Pi Frat',
+          type: 'organization',
+          eventID: 1,
+          totalMembers: 0,
+          presentMembers: 0,
+          attendanceRate: 0,
+          meetingTime: '7:00 PM - 9:00 PM',
+          location: 'Greek Life Center',
+          nextMeeting: 'Every Thursday',
+          userStatus: 'absent'
+        }]);
+      } finally {
+        setOrganizationsLoading(false);
+      }
+    };
+
+    if (currentUser) {
+      fetchOrganizations();
+    }
+  }, [currentUser]);
+
+  // Generate dynamic class schedule from organizations
+  const classSchedule = organizations.reduce((acc, org) => {
+    acc[org.name] = {
+      time: org.meetingTime || "7:00 PM - 9:00 PM",
+      location: org.location || "Greek Life Center",
+      days: [4], // Thursday meetings
+      attendanceStatus: org.userStatus || "absent",
+      lastAttended: "2025-06-19",
+      minutesLate: 0,
+      type: "organization"
+    };
+    return acc;
+  }, {});
+
+  // Generate dynamic events by date for organizations
+  const eventsByDate = {};
+  
+  // Add organization meetings to specific dates (Thursdays in June 2025)
+  const thursdays = [5, 12, 19, 26]; // Thursday dates in June 2025
+  
+  thursdays.forEach(date => {
+    eventsByDate[date] = organizations.map(org => ({
+      time: org.meetingTime || "7:00 PM - 9:00 PM",
+      title: `${org.name} Meeting`,
+      location: org.location || "Greek Life Center",
+      type: "organization",
+      organizationData: org
+    }));
+  });
 
   // Functions for month and year navigation
   const prevMonth = () => {
@@ -173,76 +201,177 @@ export default function Calendar() {
     { class: "CS 4365.003", rate: 88, attended: 12, tardy: 2, absent: 2, total: 16 },
   ];
 
+  // Fetch detailed attendance for an organization
+  const fetchAttendanceDetails = async (eventID, organizationName) => {
+    try {
+      console.log('🔄 Fetching attendance details for eventID:', eventID);
+      
+      const url = `${API_BASE_URL}/attendance/details?eventID=${eventID}`;
+      console.log('📍 Full URL:', url);
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      console.log('📡 Response status:', response.status);
+      console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('✅ Attendance details fetched:', data);
+        return data;
+      } else {
+        const errorText = await response.text();
+        console.error('❌ Failed to fetch attendance details:', response.status, errorText);
+        
+        // Show more specific error message
+        if (response.status === 403) {
+          console.error('🚫 403 Forbidden - Check API Gateway permissions and CORS');
+        } else if (response.status === 404) {
+          console.error('🔍 404 Not Found - Check if /attendance/details route exists');
+        }
+        
+        // Return fallback data structure
+        return {
+          eventID: eventID,
+          organizationName: organizationName,
+          creator: 'admin',
+          schedule: '',
+          location: '',
+          term: '',
+          attendanceRate: 0,
+          totalMembers: 0,
+          presentCount: 0,
+          tardyCount: 0,
+          absentCount: 0,
+          sessionAttendance: [],
+          lastUpdated: '',
+          error: `API Error: ${response.status} - ${errorText}`
+        };
+      }
+    } catch (error) {
+      console.error('💥 Error fetching attendance details:', error);
+      
+      // More specific error handling
+      if (error.message.includes('Failed to fetch')) {
+        console.error('🌐 Network/CORS error - check API Gateway CORS configuration');
+      }
+      
+      // Return fallback data structure
+      return {
+        eventID: eventID,
+        organizationName: organizationName,
+        creator: 'admin',
+        schedule: '',
+        location: '',
+        term: '',
+        attendanceRate: 0,
+        totalMembers: 0,
+        presentCount: 0,
+        tardyCount: 0,
+        absentCount: 0,
+        sessionAttendance: [],
+        lastUpdated: '',
+        error: `Network Error: ${error.message}`
+      };
+    }
+  };
+
   return (
     <section className="card">
       <h1>Calendar</h1>
 
       <div className="calendar-table">
         <div>
-          <h3>Today's Classes</h3>
-          {Object.entries(classSchedule).map(([name, details], index) => {
-            // Get the correct CSS class and text based on attendance status
-            let statusClass = '';
-            let statusText = '';
-            
-            switch(details.attendanceStatus) {
-              case 'present':
-                statusClass = 'green';
-                statusText = 'Present';
-                break;
-              case 'absent':
-                statusClass = 'red';
-                statusText = 'Absent';
-                break;                  case 'tardy':
-                    statusClass = 'amber';
-                    statusText = `Tardy: ${details.minutesLate} min${details.minutesLate !== 1 ? 's' : ''} late`;
-                    break;
-              default:
-                statusClass = '';
-                statusText = 'Unknown';
-            }
-            
-            return (
-              <div 
-                className={`row class-row ${hoveredClass === name ? `${details.attendanceStatus}-class` : ''}`}
-                key={name}
-                onMouseEnter={() => setHoveredClass(name)}
-                onMouseLeave={() => setHoveredClass(null)}
-                onClick={() => {
-                  setSelectedClassDetails({
-                    id: name.replace(/\./g, '-'),
-                    name: name
-                  });
-                  setShowAttendanceHistory(true);
-                }}
-              >
-                <span>
-                  {name}<br/>
-                  <span className="event-time">{details.time}</span><br/>
-                  <span className="event-location">{details.location}</span>
-                </span>
-                <span className="label">
-                  Classes
-                  {hoveredClass === name && (
-                    <span className={`attendance-status ${statusClass}`}>
-                      {` (${statusText})`}
-                    </span>
-                  )}
-                </span>
-              </div>
-            );
-          })}
+          <h3>Today's Organizations</h3>
+          {organizationsLoading ? (
+            <div className="row">
+              <span>Loading organizations...</span>
+              <span className="label">Loading</span>
+            </div>
+          ) : (
+            Object.entries(classSchedule).map(([name, details], index) => {
+              // Get the correct CSS class and text based on attendance status
+              let statusClass = '';
+              let statusText = '';
+              
+              switch(details.attendanceStatus) {
+                case 'present':
+                  statusClass = 'green';
+                  statusText = 'Present';
+                  break;
+                case 'absent':
+                  statusClass = 'red';
+                  statusText = 'Absent';
+                  break;
+                case 'tardy':
+                  statusClass = 'amber';
+                  statusText = `Tardy: ${details.minutesLate} min${details.minutesLate !== 1 ? 's' : ''} late`;
+                  break;
+                default:
+                  statusClass = '';
+                  statusText = 'Unknown';
+              }
+              
+              return (
+                <div 
+                  className={`row class-row ${hoveredClass === name ? `${details.attendanceStatus}-class` : ''}`}
+                  key={name}
+                  onMouseEnter={() => setHoveredClass(name)}
+                  onMouseLeave={() => setHoveredClass(null)}
+                  onClick={async () => {
+                    // Find the organization data for this name
+                    const orgData = organizations.find(org => org.name === name);
+                    if (orgData) {
+                      console.log('🔄 Fetching attendance details for organization:', name);
+                      const attendanceDetails = await fetchAttendanceDetails(orgData.eventID, name);
+                      setSelectedClassDetails({
+                        id: name.replace(/\./g, '-').replace(/\s+/g, '-').toLowerCase(),
+                        name: name,
+                        attendanceDetails: attendanceDetails
+                      });
+                      setShowAttendanceHistory(true);
+                    }
+                  }}
+                >
+                  <span>
+                    {name}<br/>
+                    <span className="event-time">{details.time}</span><br/>
+                    <span className="event-location">{details.location}</span>
+                  </span>
+                  <span className="label">
+                    Organizations
+                    {hoveredClass === name && (
+                      <span className={`attendance-status ${statusClass}`}>
+                        {` (${statusText})`}
+                      </span>
+                    )}
+                  </span>
+                </div>
+              );
+            })
+          )}
         </div>
         <div>
           <h3>Attendance Rate</h3>
-          {attendanceRates.map((item, index) => (
-            <div className="row" key={index}>
-              <span>{item.class}</span>
-              <span className={item.rate >= 90 ? "green" : item.rate >= 80 ? "amber" : "red"}>
-                {item.rate}% ({item.attended} present, {item.tardy} tardy, {item.absent} absent)
-              </span>
+          {organizationsLoading ? (
+            <div className="row">
+              <span>Loading...</span>
+              <span>...</span>
             </div>
-          ))}
+          ) : (
+            organizations.map((org, index) => (
+              <div className="row" key={index}>
+                <span>{org.name}</span>
+                <span className={(org.attendanceRate || 0) >= 90 ? "green" : (org.attendanceRate || 0) >= 70 ? "amber" : "red"}>
+                  {org.attendanceRate || 0}% ({org.presentMembers || 0} present, {org.absentMembers || 0} absent)
+                </span>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
@@ -387,9 +516,8 @@ export default function Calendar() {
             >
               &times;
             </button>
-            <AttendanceHistory 
-              userID="current-user" 
-              classID={selectedClassDetails.id} 
+            <OrganizationAttendanceDetail 
+              attendanceDetails={selectedClassDetails.attendanceDetails}
             />
           </div>
         </div>

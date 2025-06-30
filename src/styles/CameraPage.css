@@ -217,31 +217,34 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 2rem;
+  padding: 1rem;
   animation: fadeIn 0.3s ease;
 }
 
 .camera-modal {
   background: var(--card-bg, #fff);
-  border-radius: 24px;
+  border-radius: 20px;
   max-width: 90vw;
-  max-height: 90vh;
-  width: 850px;
+  max-height: 85vh;
+  width: 750px;
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
   overflow: hidden;
   border: var(--card-border);
   transition: all var(--animation-speed) var(--animation-easing);
   animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
 }
 
 .camera-modal-header {
-  padding: 2rem 2.5rem 1.5rem;
+  padding: 1.5rem 2rem 1rem;
   border-bottom: 1px solid var(--border-light, rgba(0, 0, 0, 0.06));
   display: flex;
   justify-content: space-between;
   align-items: center;
   background: linear-gradient(135deg, var(--bg), rgba(var(--sidebar-rgb, 107, 165, 183), 0.05));
   transition: all var(--animation-speed) var(--animation-easing);
+  flex-shrink: 0;
 }
 
 .camera-modal-header-content {
@@ -306,14 +309,20 @@
 .camera-video-wrapper {
   position: relative;
   background: #000;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .camera-video {
   width: 100%;
-  height: auto;
-  max-height: 65vh;
+  height: 100%;
+  max-height: 50vh;
   display: block;
   transform: scaleX(-1); /* Fix mirror effect */
+  object-fit: cover;
+  flex: 1;
 }
 
 .camera-video-overlay {
@@ -356,12 +365,13 @@
   right: 0;
   background: var(--control-bar-bg, rgba(255, 255, 255, 0.95));
   backdrop-filter: blur(10px);
-  padding: 1.5rem 2rem;
+  padding: 1rem 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
   border-top: 1px solid var(--border-light, rgba(0, 0, 0, 0.1));
   box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
 }
 
 .camera-recognition-button {
@@ -424,17 +434,403 @@
   transition: color var(--animation-speed) var(--animation-easing);
 }
 
-/* Status Colors - Color-blind friendly */
-.status-idle {
-  background-color: var(--warning-color, #f59e0b);
+/* Recognition Overlay Styles */
+.recognition-overlay {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  right: 1rem;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 10;
 }
 
-.status-recognizing {
-  background-color: var(--info-color, #3b82f6);
+.recognition-card {
+  background: rgba(var(--card-bg-rgb, 255, 255, 255), 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-light, rgba(0, 0, 0, 0.1));
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  max-width: 350px;
+  animation: slideDown 0.3s ease;
+  pointer-events: auto;
 }
 
-.status-recognized {
-  background-color: var(--success-color, #169143);
+.recognition-card h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--success-color, #169143);
+  letter-spacing: -0.01em;
+}
+
+.recognition-card p {
+  margin: 0.375rem 0;
+  font-size: 0.85rem;
+  color: var(--text-primary, #333);
+  line-height: 1.4;
+}
+
+.recognition-card p:last-child {
+  margin-bottom: 0;
+}
+
+.recognition-card strong {
+  font-weight: 600;
+  color: var(--text-primary, #333);
+}
+
+/* Status indicator for not-found state */
+.status-not-found {
+  background-color: var(--error-color, #ef4444);
+}
+
+/* Dark mode adjustments for recognition card */
+body[data-theme="dark"] .recognition-card {
+  background: rgba(37, 37, 37, 0.95);
+  border: 1px solid #333;
+}
+
+body[data-theme="dark"] .recognition-card p,
+body[data-theme="dark"] .recognition-card strong {
+  color: #e0e0e0;
+}
+
+@media (prefers-color-scheme: dark) {
+  body[data-using-system-theme="true"] .recognition-card {
+    background: rgba(37, 37, 37, 0.95);
+    border: 1px solid #333;
+  }
+
+  body[data-using-system-theme="true"] .recognition-card p,
+  body[data-using-system-theme="true"] .recognition-card strong {
+    color: #e0e0e0;
+  }
+}
+
+/* Animation for recognition card */
+@keyframes slideDown {
+  0% { 
+    transform: translateY(-20px); 
+    opacity: 0; 
+  }
+  100% { 
+    transform: translateY(0); 
+    opacity: 1; 
+  }
+}
+
+/* Color-blind mode adjustments for error state */
+body.color-blind-mode .status-not-found {
+  background-color: #dc2626; /* Darker red for better contrast */
+}
+
+body.color-blind-mode[data-theme="dark"] .status-not-found {
+  background-color: #f87171; /* Lighter red for dark mode */
+}
+
+@media (prefers-color-scheme: dark) {
+  body.color-blind-mode[data-using-system-theme="true"] .status-not-found {
+    background-color: #f87171;
+  }
+}
+
+/* Responsive adjustments for recognition overlay */
+@media (max-width: 768px) {
+  .recognition-overlay {
+    top: 1rem;
+    left: 1rem;
+    right: 1rem;
+  }
+  
+  .recognition-card {
+    padding: 1.25rem 1.5rem;
+    max-width: none;
+  }
+  
+  .recognition-card h4 {
+    font-size: 1.1rem;
+  }
+  
+  .recognition-card p {
+    font-size: 0.9rem;
+  }
+}
+
+/* Class Selection and Attendance Controls */
+.camera-controls-section {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border-light, rgba(0, 0, 0, 0.1));
+  background: var(--bg, #fff);
+  transition: all var(--animation-speed) var(--animation-easing);
+  flex-shrink: 0;
+}
+
+.class-selection-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.class-selection-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary, #333);
+  letter-spacing: 0.01em;
+  transition: color var(--animation-speed) var(--animation-easing);
+}
+
+.class-selection-dropdown {
+  padding: 0.625rem 0.875rem;
+  font-size: 0.9rem;
+  border: 1px solid var(--border-light, #d1d5db);
+  border-radius: 6px;
+  background: var(--card-bg, #fff);
+  color: var(--text-primary, #333);
+  cursor: pointer;
+  transition: all var(--animation-speed) var(--animation-easing);
+  outline: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.class-selection-dropdown:hover:not(:disabled) {
+  border-color: var(--wave, #6ba5b7);
+  box-shadow: 0 2px 6px rgba(var(--wave-rgb), 0.15);
+}
+
+.class-selection-dropdown:focus {
+  border-color: var(--wave, #6ba5b7);
+  box-shadow: 0 0 0 3px rgba(var(--wave-rgb), 0.1);
+}
+
+.class-selection-dropdown:disabled {
+  background: var(--disabled-bg, #f3f4f6);
+  color: var(--disabled-text, #9ca3af);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.class-selection-dropdown option {
+  padding: 0.5rem;
+  background: var(--card-bg, #fff);
+  color: var(--text-primary, #333);
+}
+
+/* Attendance Message Styles */
+.attendance-message {
+  padding: 0.625rem 0.875rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-align: center;
+  transition: all var(--animation-speed) var(--animation-easing);
+  animation: slideIn 0.3s ease;
+  border-left: 3px solid;
+  backdrop-filter: blur(5px);
+}
+
+.attendance-message.success {
+  background: var(--success-bg, rgba(34, 197, 94, 0.1));
+  color: var(--success-color, #169143);
+  border-left-color: var(--success-color, #169143);
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.2);
+}
+
+.attendance-message.error {
+  background: var(--error-bg, rgba(239, 68, 68, 0.1));
+  color: var(--error-color, #dc2626);
+  border-left-color: var(--error-color, #dc2626);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+}
+
+/* Dark mode adjustments for new components */
+body[data-theme="dark"] .camera-controls-section {
+  background: #252525;
+  border-bottom-color: #333;
+}
+
+body[data-theme="dark"] .class-selection-dropdown {
+  background: #333;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+body[data-theme="dark"] .class-selection-dropdown:hover:not(:disabled) {
+  border-color: var(--wave, #6ba5b7);
+}
+
+body[data-theme="dark"] .class-selection-dropdown option {
+  background: #333;
+  color: #e0e0e0;
+}
+
+@media (prefers-color-scheme: dark) {
+  body[data-using-system-theme="true"] .camera-controls-section {
+    background: #252525;
+    border-bottom-color: #333;
+  }
+
+  body[data-using-system-theme="true"] .class-selection-dropdown {
+    background: #333;
+    border-color: #444;
+    color: #e0e0e0;
+  }
+
+  body[data-using-system-theme="true"] .class-selection-dropdown:hover:not(:disabled) {
+    border-color: var(--wave, #6ba5b7);
+  }
+
+  body[data-using-system-theme="true"] .class-selection-dropdown option {
+    background: #333;
+    color: #e0e0e0;
+  }
+}
+
+/* Animation for attendance message */
+@keyframes slideIn {
+  0% { 
+    transform: translateY(-10px); 
+    opacity: 0; 
+  }
+  100% { 
+    transform: translateY(0); 
+    opacity: 1; 
+  }
+}
+
+/* Responsive adjustments for new components */
+@media (max-width: 768px) {
+  .camera-controls-section {
+    padding: 1rem 1.5rem;
+  }
+  
+  .class-selection-container {
+    gap: 0.5rem;
+  }
+  
+  .class-selection-dropdown {
+    padding: 0.625rem 0.875rem;
+    font-size: 0.95rem;
+  }
+  
+  .attendance-message {
+    padding: 0.625rem 0.875rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Responsive adjustments for modal */
+@media (max-width: 768px) {
+  .camera-overlay {
+    padding: 0.5rem;
+  }
+  
+  .camera-modal {
+    margin: 0.5rem;
+    width: calc(100vw - 1rem);
+    max-width: none;
+    max-height: 90vh;
+  }
+  
+  .camera-modal-header {
+    padding: 1rem 1.25rem 0.75rem;
+  }
+  
+  .camera-controls-section {
+    padding: 0.75rem 1.25rem;
+  }
+  
+  .camera-bottom-control-bar {
+    padding: 0.75rem 1rem;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .camera-video {
+    max-height: 40vh;
+  }
+  
+  .recognition-overlay {
+    top: 0.75rem;
+    left: 0.75rem;
+    right: 0.75rem;
+  }
+  
+  .recognition-card {
+    padding: 0.875rem 1.25rem;
+    max-width: none;
+  }
+  
+  .recognition-card h4 {
+    font-size: 1rem;
+  }
+  
+  .recognition-card p {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-height: 700px) {
+  .camera-modal {
+    max-height: 95vh;
+  }
+  
+  .camera-video {
+    max-height: 35vh;
+  }
+  
+  .camera-modal-header {
+    padding: 1rem 1.5rem 0.75rem;
+  }
+  
+  .camera-controls-section {
+    padding: 0.75rem 1.5rem;
+  }
+  
+  .camera-bottom-control-bar {
+    padding: 0.75rem 1.5rem;
+  }
+}
+
+@media (max-height: 600px) {
+  .camera-modal {
+    max-height: 98vh;
+  }
+  
+  .camera-video {
+    max-height: 30vh;
+  }
+  
+  .camera-modal-header {
+    padding: 0.75rem 1.5rem 0.5rem;
+  }
+  
+  .camera-controls-section {
+    padding: 0.5rem 1.5rem;
+  }
+  
+  .camera-bottom-control-bar {
+    padding: 0.5rem 1.5rem;
+    flex-direction: row;
+    gap: 0.5rem;
+  }
+  
+  .camera-recognition-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    min-width: 70px;
+  }
+  
+  .camera-status-section {
+    padding: 0.5rem 1rem;
+  }
+  
+  .camera-status-text {
+    font-size: 0.85rem;
+  }
 }
 
 /* Dark Mode Styles */
@@ -616,5 +1012,81 @@ body.color-blind-mode[data-theme="dark"] {
   .camera-status-dot,
   .camera-status-dot-control {
     animation: none;
+  }
+}
+
+/* Selected Organization Info Styles */
+.selected-organization-info {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: var(--card-bg, #fff);
+  border: 1px solid var(--border-light, #e5e7eb);
+  border-radius: 8px;
+  transition: all var(--animation-speed) var(--animation-easing);
+}
+
+.organization-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.organization-details h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--wave, #6ba5b7);
+  border-bottom: 2px solid var(--wave, #6ba5b7);
+  padding-bottom: 0.5rem;
+}
+
+.organization-details p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-primary, #333);
+  line-height: 1.4;
+}
+
+.organization-details strong {
+  color: var(--text-primary, #333);
+  font-weight: 600;
+}
+
+/* Dark mode adjustments for organization details */
+body[data-theme="dark"] .selected-organization-info {
+  background: #333;
+  border-color: #444;
+}
+
+body[data-theme="dark"] .organization-details p,
+body[data-theme="dark"] .organization-details strong {
+  color: #e0e0e0;
+}
+
+@media (prefers-color-scheme: dark) {
+  body[data-using-system-theme="true"] .selected-organization-info {
+    background: #333;
+    border-color: #444;
+  }
+
+  body[data-using-system-theme="true"] .organization-details p,
+  body[data-using-system-theme="true"] .organization-details strong {
+    color: #e0e0e0;
+  }
+}
+
+/* Responsive adjustments for organization details */
+@media (max-width: 768px) {
+  .selected-organization-info {
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+  }
+  
+  .organization-details h4 {
+    font-size: 1rem;
+  }
+  
+  .organization-details p {
+    font-size: 0.85rem;
   }
 }

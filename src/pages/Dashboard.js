@@ -1,28 +1,112 @@
-
 import { useEffect, useRef, useState } from 'react';
+import { getCurrentUser } from 'aws-amplify/auth';
 import StrikeTracker from '../components/StrikeTracker';
 import ClassAttendanceList from '../components/ClassAttendanceList';
 
 export default function Dashboard() {
   // State for selected class (strike count will be managed by admin in the future)
-  const [selectedClass, setSelectedClass] = useState('CS 3162.002');
+  const [selectedClass, setSelectedClass] = useState('');
+  const [organizations, setOrganizations] = useState([]);
+  const [organizationsLoading, setOrganizationsLoading] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  
+  // API base URL
+  const API_BASE_URL = 'https://9g63csumjh.execute-api.us-east-2.amazonaws.com/dev';
 
-  const classes = [
-    { name: "CS 3162.002", type: "Classes" },
-    { name: "CS 4347.001", type: "Classes" },
-    { name: "CS 4365.003", type: "Classes" },
-    { name: "MKT 3300.001", type: "Classes" },
-    { name: "ACM Projects", type: "Organizations" }
-  ];
+  // Fetch current user
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const user = await getCurrentUser();
+        setCurrentUser(user);
+        console.log('Current user:', user);
+      } catch (error) {
+        console.error('Error fetching current user:', error);
+      }
+    };
+    
+    fetchCurrentUser();
+  }, []);
+
+  // Fetch organizations dynamically
+  useEffect(() => {
+    const fetchOrganizations = async () => {
+      setOrganizationsLoading(true);
+      try {
+        const userID = currentUser?.userId || '';
+        const url = `${API_BASE_URL}/organizations${userID ? `?userID=${userID}` : ''}`;
+        
+        console.log('🔄 Fetching organizations from:', url);
+        
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('✅ Organizations fetched:', data);
+          setOrganizations(data.organizations || []);
+          
+          // Set first organization as selected if none selected
+          if (!selectedClass && data.organizations && data.organizations.length > 0) {
+            setSelectedClass(data.organizations[0].name);
+          }
+        } else {
+          console.error('❌ Failed to fetch organizations:', response.status);
+          // Fallback to default organization
+          const fallbackOrg = {
+            id: 'kappa-theta-pi',
+            name: 'Kappa Theta Pi Frat',
+            type: 'organization',
+            eventID: 1,
+            totalMembers: 0,
+            presentMembers: 0,
+            attendanceRate: 0
+          };
+          setOrganizations([fallbackOrg]);
+          setSelectedClass(fallbackOrg.name);
+        }
+      } catch (error) {
+        console.error('💥 Error fetching organizations:', error);
+        // Fallback to default organization
+        const fallbackOrg = {
+          id: 'kappa-theta-pi',
+          name: 'Kappa Theta Pi Frat',
+          type: 'organization',
+          eventID: 1,
+          totalMembers: 0,
+          presentMembers: 0,
+          attendanceRate: 0
+        };
+        setOrganizations([fallbackOrg]);
+        setSelectedClass(fallbackOrg.name);
+      } finally {
+        setOrganizationsLoading(false);
+      }
+    };
+
+    if (currentUser) {
+      fetchOrganizations();
+    }
+  }, [currentUser]);
+
+  // Convert organizations to classes format for existing components
+  const classes = organizations.map(org => ({
+    name: org.name,
+    type: "Organizations"
+  }));
   
-  const attendance = [
-    { code: "CS 3162.002", done: 15, total: 16, percent: "94%", cls: "green" },
-    { code: "CS 4347.001", done: 13, total: 16, percent: "81%", cls: "amber" },
-    { code: "CS 4365.003", done: 14, total: 16, percent: "88%", cls: "amber" },
-    { code: "MKT 3300.001", done: 10, total: 16, percent: "63%", cls: "red" },
-    { code: "ACM Projects", done: 14, total: 16, percent: "88%", cls: "amber" },
-  ];
-  
+  const attendance = organizations.map(org => ({
+    code: org.name,
+    done: org.presentMembers || 0,
+    total: org.totalMembers || 0,
+    percent: `${org.attendanceRate || 0}%`,
+    cls: (org.attendanceRate || 0) >= 90 ? "green" : (org.attendanceRate || 0) >= 70 ? "amber" : "red"
+  }));
+
   // Refs for the sections that will be animated
   const classAttendanceCardRef = useRef(null);
   const managementCardRef = useRef(null);
