@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getCurrentUser, signOut } from 'aws-amplify/auth';
+import { signOut, getCurrentUser } from 'aws-amplify/auth';
 import Sidebar from "./components/Sidebar";
 import Dashboard from "./pages/Dashboard";
 import Calendar from "./pages/Calendar";
@@ -75,8 +75,13 @@ export default function App() {
 
   const handleLogout = async () => {
     try {
+      // Use Cognito signOut
       await signOut();
+      
+      // Clear any stored data
       localStorage.removeItem("idToken");
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
       localStorage.removeItem("userData");
       setIsAuthenticated(false);
     } catch (error) {

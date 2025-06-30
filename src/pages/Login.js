@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { signUp, confirmSignUp, signIn, getCurrentUser, fetchAuthSession } from 'aws-amplify/auth';
 import '../amplify-config';
-import { signUp, signIn, fetchAuthSession, confirmSignUp, signOut, getCurrentUser } from 'aws-amplify/auth';
-import { get } from 'aws-amplify/api';
 import "../styles/Login.css";
+
+const API_BASE_URL = "https://njs67kowh1.execute-api.us-east-2.amazonaws.com/Dev";
 
 export default function Login({ onLogin }) {
   const [isLogin, setIsLogin] = useState(true);
@@ -15,7 +16,7 @@ export default function Login({ onLogin }) {
   const [verificationCode, setVerificationCode] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [errors, setErrors] = useState({});
-  const [pendingUsername, setPendingUsername] = useState("");
+  const [pendingUserData, setPendingUserData] = useState(null);
 
   const navigate = useNavigate();
 
@@ -28,43 +29,144 @@ export default function Login({ onLogin }) {
     try {
       const user = await getCurrentUser();
       if (user) {
-        // User is already signed in, get their session
-        const session = await fetchAuthSession();
-        const token = session.tokens?.idToken?.toString();
-        
-        if (token) {
-          localStorage.setItem("idToken", token);
-          
-          // Try to get user data from API using Amplify API client
-          try {
-            const response = await get({
-              apiName: 'oneface_gateway',
-              path: '/get_user',
-              options: {
-                headers: {
-                  Authorization: `Bearer ${token}`
-                }
-              }
-            });
-            localStorage.setItem("userData", JSON.stringify(response));
-          } catch (apiError) {
-            console.warn("API call failed:", apiError.message);
-            // Store a placeholder user data so the app can continue
-            const placeholderData = {
-              message: "User data unavailable due to API configuration",
-              timestamp: new Date().toISOString()
-            };
-            localStorage.setItem("userData", JSON.stringify(placeholderData));
-          }
-          
-          onLogin();
-          navigate("/dashboard");
-        }
+        onLogin();
+        navigate("/dashboard");
       }
     } catch (error) {
-      // No existing session or error - user needs to sign in
       console.log("No existing session found");
     }
+  };
+
+  // Login function using Cognito
+  const attemptLogin = async (username, password) => {
+    console.log("🔐 Attempting login for:", username);
+    const { isSignedIn, nextStep } = await signIn({ username, password });
+    
+    if (isSignedIn) {
+      console.log("✅ Cognito login successful!");
+      
+      // Get user data from your API after successful login
+      try {
+        console.log("🔍 Getting current user and tokens...");
+        const user = await getCurrentUser();
+        console.log("👤 Current user:", user?.username || user?.userId);
+        
+        // Use fetchAuthSession instead of getSignInUserSession
+        const { tokens } = await fetchAuthSession();
+        console.log("🎫 Tokens received:", tokens ? "✅" : "❌");
+        
+        if (!tokens?.idToken) {
+          console.error("❌ No idToken found in session");
+          return { isSignedIn, nextStep };
+        }
+        
+        const idToken = tokens.idToken.toString();
+        console.log("🔑 ID Token length:", idToken.length);
+        
+        // Store the token
+        localStorage.setItem("idToken", idToken);
+        console.log("💾 Token stored in localStorage");
+        
+        // TODO: TEMPORARILY DISABLED - Fix CORS on /user endpoint first
+        // Try to call your API to create/get user data
+        console.log("⚠️ Skipping /user API call due to CORS issue - login will proceed without user data sync");
+        /*
+        console.log("🌐 Making API call to /user endpoint...");
+        try {
+          const userRes = await fetch(`${API_BASE_URL}/user`, {
+            method: "GET",
+            headers: { 
+              "Authorization": `Bearer ${idToken}`,
+              "Content-Type": "application/json"
+            }
+          });
+          
+          console.log("📡 API Response status:", userRes.status);
+          console.log("📡 API Response ok:", userRes.ok);
+          
+          if (userRes.ok) {
+            const userData = await userRes.json();
+            localStorage.setItem("userData", JSON.stringify(userData));
+            console.log("✅ User data fetched successfully:", userData);
+          } else {
+            const errorText = await userRes.text();
+            console.warn("⚠️ Failed to fetch user data, status:", userRes.status, "body:", errorText);
+          }
+        } catch (apiError) {
+          console.error("❌ API call failed:", apiError);
+          console.error("API Error details:", {
+            name: apiError.name,
+            message: apiError.message,
+            stack: apiError.stack
+          });
+        }
+        */
+        
+      } catch (userError) {
+        console.error("❌ Failed to get user session:", userError);
+        console.error("User session error details:", {
+          name: userError.name, 
+          message: userError.message,
+          stack: userError.stack
+        });
+      }
+    } else {
+      console.log("❌ Cognito login failed or incomplete");
+    }
+    
+    return { isSignedIn, nextStep };
+  };
+
+  // Signup function - hybrid approach using both custom API and Cognito
+  const attemptSignup = async (username, email, password, name) => {
+    console.log("Attempting signup with:", { username, email, password: "***", name });
+    
+    // Generate a username that's not in email format
+    const emailPrefix = email.split('@')[0];
+    const randomSuffix = Math.random().toString(36).substring(2, 8);
+    const cognitoUsername = `${emailPrefix}_${randomSuffix}`;
+    
+    // First, call your custom API to create user in DynamoDB
+    try {
+      const res = await fetch(`${API_BASE_URL}/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          username: cognitoUsername, 
+          password: password,
+          email: email,
+          name: name
+        })
+      });
+      
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || err.error || `HTTP ${res.status}: ${res.statusText}`);
+      }
+      
+      const result = await res.json();
+      console.log("DynamoDB user created successfully:", result);
+      
+      return { 
+        isSignUpComplete: false, 
+        nextStep: { signUpStep: 'CONFIRM_SIGN_UP' }, 
+        username: cognitoUsername 
+      };
+      
+    } catch (error) {
+      console.error("Signup error:", error);
+      throw error;
+    }
+  };
+
+  // Confirm signup with verification code
+  const confirmSignup = async (username, verificationCode) => {
+    const { isSignUpComplete, nextStep } = await confirmSignUp({
+      username,
+      confirmationCode: verificationCode
+    });
+    
+    return { isSignUpComplete, nextStep };
   };
 
   const validateForm = () => {
@@ -113,54 +215,15 @@ export default function Login({ onLogin }) {
     if (!validateVerificationCode()) return;
 
     try {
-      const { isSignUpComplete } = await confirmSignUp({
-        username: pendingUsername,
-        confirmationCode: verificationCode
-      });
+      // Confirm signup with verification code
+      await confirmSignup(pendingUserData.username, verificationCode);
 
-      if (isSignUpComplete) {
-        console.log("Account verified successfully!");
-        
-        // Now sign in the user automatically
-        const { isSignedIn } = await signIn({ 
-          username: pendingUsername, 
-          password 
-        });
+      // Now try to sign in the user using REST API
+      const tokens = await attemptLogin(pendingUserData.username, pendingUserData.password);
+      console.log("Signed in! Token:", tokens.idToken);
 
-        if (isSignedIn) {
-          const session = await fetchAuthSession();
-          const token = session.tokens?.idToken?.toString();
-
-          localStorage.setItem("idToken", token);
-          console.log("Signed in! Token:", token);
-
-          // Make API call to get user data
-          try {
-            const response = await get({
-              apiName: 'oneface_gateway',
-              path: '/get_user',
-              options: {
-                headers: {
-                  Authorization: `Bearer ${token}`
-                }
-              }
-            });
-            console.log("User data from API:", response);
-            localStorage.setItem("userData", JSON.stringify(response));
-          } catch (apiError) {
-            console.warn("API call failed:", apiError.message);
-            // Store placeholder data so the app can continue
-            const placeholderData = {
-              message: "User data unavailable due to API configuration",
-              timestamp: new Date().toISOString()
-            };
-            localStorage.setItem("userData", JSON.stringify(placeholderData));
-          }
-
-          onLogin();
-          navigate("/dashboard");
-        }
-      }
+      onLogin();
+      navigate("/dashboard");
     } catch (err) {
       console.error("Verification error:", err);
       setErrors({ general: err.message });
@@ -174,78 +237,53 @@ export default function Login({ onLogin }) {
   
     try {
       if (isLogin) {
-        // Check if user is already signed in and sign them out first
+        // For login, we need to try different username formats since we don't know the exact username
+        // Try email first, then try generated username format
         try {
-          await signOut();
-        } catch (signOutError) {
-          console.log("No existing session to sign out");
-        }
+          const { isSignedIn } = await attemptLogin(email, password);
+          console.log("Signed in!", isSignedIn);
 
-        const { isSignedIn } = await signIn({ username: email, password });
-  
-        if (isSignedIn) {
-          const session = await fetchAuthSession();
-          const token = session.tokens?.idToken?.toString();
-  
-          localStorage.setItem("idToken", token);
-          console.log("Signed in! Token:", token);
-
-          // // Make API call to get user data
-          // try {
-          //   const response = await get({
-          //     apiName: 'oneface_gateway',
-          //     path: '/get_user',
-          //     options: {
-          //       headers: {
-          //         Authorization: `Bearer ${token}`
-          //       }
-          //     }
-          //   });
-          //   console.log("User data from API:", response);
-          //   localStorage.setItem("userData", JSON.stringify(response));
-          // } catch (apiError) {
-          //   console.warn("API call failed:", apiError.message);
-          //   // Store placeholder data so the app can continue
-          //   const placeholderData = {
-          //     message: "User data unavailable due to API configuration",
-          //     timestamp: new Date().toISOString()
-          //   };
-          //   localStorage.setItem("userData", JSON.stringify(placeholderData));
-          // }
-
-          onLogin();
-          navigate("/dashboard");
+          if (isSignedIn) {
+            onLogin();
+            navigate("/dashboard");
+          }
+        } catch (emailLoginError) {
+          // If email login fails, it might be because we need the generated username
+          // Unfortunately, we don't store the generated username anywhere
+          // For now, show error but in production you'd want to store this mapping
+          console.error("Login failed with email:", emailLoginError.message);
+          setErrors({ general: "Login failed. Please check your credentials." });
         }
       } else {
-        const { userId } = await signUp({
-          username: name,
-          password,
-          options: {
-            userAttributes: {
-              email,
-              name
-            }
-          }
-        });
-  
-        console.log("Sign-up successful:", userId);
-        setPendingUsername(name);
-        setIsVerifying(true);
-        setErrors({});
+        // Use Cognito for signup - this will push to DynamoDB
+        const result = await attemptSignup(name, email, password, name);
+        console.log("Sign-up successful:", result);
+        
+        // Handle both success and permission error cases
+        if (result.isSignUpComplete || result.nextStep) {
+          // Store pending user data for verification
+          setPendingUserData({
+            username: result.username,
+            email: email,
+            password: password
+          });
+          
+          setIsVerifying(true);
+          setErrors({});
+        }
       }
     } catch (err) {
       console.error("Auth error:", err);
       setErrors({ general: err.message });
     }
   };
-  
 
   const toggleMode = () => {
     setIsLogin(!isLogin);
     setIsVerifying(false);
     setErrors({});
     setVerificationCode("");
-    setPendingUsername("");
+    setPendingUserData(null);
   };
 
   const backToSignUp = () => {
